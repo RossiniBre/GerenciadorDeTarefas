@@ -27,4 +27,8 @@ public class Task {
     public String getDescription(){ return description; }
     public TaskStatus getStatus(){ return status; }
 
+    @Override
+    public String toString(){
+        return "Task: " + title + " - Status: " + status;
+    }
 }
