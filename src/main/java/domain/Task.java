@@ -5,11 +5,21 @@ public class Task {
     private String description;
     private TaskStatus status;
 
-    Task(String title, String description, TaskStatus status){
+    private Task(String title, String description, TaskStatus status){
         if (title == null || title.isBlank()){
             throw new IllegalArgumentException("Título é obrigatório!");
         }
-        this.title = title; this.description = description; this.status = status;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+    }
+
+    public static Task newTask(String title, String description){
+        return new Task(title, description, TaskStatus.PENDING);
+    }
+
+    public static Task rebuiltedTask(String title, String description, TaskStatus status){
+        return new Task(title, description, status);
     }
 
     // getters
