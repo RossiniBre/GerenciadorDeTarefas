@@ -5,11 +5,9 @@ import domain.TaskRepository;
 
 public class CreateTaskUseCase {
 
-    private TaskRepository repo;
+    private final TaskRepository repo;
 
-    public CreateTaskUseCase(TaskRepository repo){
-        this.repo = repo;
-    }
+    public CreateTaskUseCase(TaskRepository repo){ this.repo = repo; }
 
     public Task execute(String title, String description){
         Task task = Task.newTask(title, description);
