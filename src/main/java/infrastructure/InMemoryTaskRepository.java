@@ -2,7 +2,6 @@ package infrastructure;
 
 import domain.TaskRepository;
 import domain.Task;
-
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;

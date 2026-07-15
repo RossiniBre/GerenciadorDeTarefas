@@ -1,6 +1,8 @@
 package application;
 
 import domain.Task;
+import domain.TaskCategory;
+import domain.TaskPriority;
 import domain.TaskRepository;
 
 public class UpdateTaskDetailsUseCase {

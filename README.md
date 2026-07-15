@@ -6,7 +6,7 @@ Java.
 
 ## What's implemented so far
 
-**Phase 1 — Foundation**
+### Phase 1 — Foundation
 - `Task` entity with constructor validation and a Static Factory
   Method (`Task.newTask(...)`)
 - `TaskStatus` enum
@@ -16,70 +16,98 @@ Java.
   interface (Dependency Inversion)
 - `Main` as the composition root
 
-**Phase 2 — Update, delete, testing (in progress)**
+### Phase 2 — Update, delete and testing
 - `Task.updateDetails(...)` — mutates title/description with the
   same validation rules as construction
-- `UpdateTaskDetailsUseCase` — find, mutate, persist, return the
+- `UpdateTaskDetailsUseCase` — find, mutate, persist and return the
   updated `Task`
 - `DeleteTaskUseCase` — find (to guarantee existence), then remove
 - `StartTaskUseCase` / `CompleteTaskUseCase` — status transitions
   guarded by `Task`'s own state-change rules
-- `InMemoryTaskRepository.save` now upserts (removes any existing
-  entry with the same id before adding) instead of always
-  appending — fixes a duplication bug found via testing
-- JUnit 5 configured via Maven; unit tests cover
-  `InMemoryTaskRepository` (save/find/no-duplication on update)
-- **Still missing:** unit tests for the use cases themselves
-  (currently only the repository is covered)
+- `InMemoryTaskRepository.save` now performs an upsert instead of
+  always appending, preventing duplicate tasks
+- JUnit 5 configured via Maven
+- Unit tests covering repository behavior and application use cases
+
+### Phase 3 — Categories, priorities and Builder
+- `TaskCategory` enum
+- `TaskPriority` enum
+- `Task` now supports category and priority
+- Fail-fast validation for every field update, keeping entity state
+  always valid
+- `TaskBuilder` with fluent method chaining
+- Builder reuses `Task.newTask(...)` and applies only the desired
+  updates instead of duplicating construction logic
+- Existing use cases updated to support the new fields
+- Existing unit tests updated and all passing
 
 ## Architecture
+
+```
 src/main/java/
-domain/           Business rules. No knowledge of infrastructure.
-Task.java
-TaskStatus.java
-TaskRepository.java (interface — the contract)
-application/       Use cases. Orchestrates the domain.
-CreateTaskUseCase.java
-UpdateTaskDetailsUseCase.java
-DeleteTaskUseCase.java
-StartTaskUseCase.java
-CompleteTaskUseCase.java
-infrastructure/     Technical details (persistence, frameworks).
-InMemoryTaskRepository.java
-Main.java           Composition root.
+├── domain/
+│   ├── Task.java
+│   ├── TaskBuilder.java
+│   ├── TaskStatus.java
+│   ├── TaskCategory.java
+│   ├── TaskPriority.java
+│   └── TaskRepository.java
+│
+├── application/
+│   ├── CreateTaskUseCase.java
+│   ├── UpdateTaskDetailsUseCase.java
+│   ├── DeleteTaskUseCase.java
+│   ├── StartTaskUseCase.java
+│   └── CompleteTaskUseCase.java
+│
+└── infrastructure/
+    ├── InMemoryTaskRepository.java
+    └── Main.java
+
 src/test/java/
-infrastructure/
-InMemoryTaskRepositoryTest.java
+└── ...
+```
 
 Dependency direction always points inward: infrastructure depends on
 domain, never the other way around.
 
 ## Roadmap
 
-| Phase | Scope | Pattern |
-|---|---|---|
-| 1 done | Create tasks, in-memory persistence | Repository, Static Factory |
-| 2 in progress | Update/delete done; use-case unit tests still pending | -- |
-| 3 | Categories and priorities | Factory or Builder |
-| 4 | Users and authentication | Strategy |
-| 5 | REST API + MySQL persistence | Adapter |
-| 6 | AI-assisted task creation from free text | Strategy |
-| 7 | Notifications | Observer |
-| 8 | Migrate to Spring Boot | -- |
+| Phase         | Scope | Pattern |
+|---------------|-------|---------|
+| 1 done        | Create tasks, in-memory persistence | Repository, Static Factory |
+| 2 done        | Update/delete, status transitions and unit tests | — |
+| 3 done        | Categories, priorities and fluent TaskBuilder | Builder |
+| 4 in progress | Users and authentication | Strategy |
+| 5             | REST API + MySQL persistence | Adapter |
+| 6             | AI-assisted task creation from free text | Strategy |
+| 7             | Notifications | Observer |
+| 8             | Migrate to Spring Boot | — |
 
 ## Tech stack
 
-Java 21 (Corretto), Maven, JUnit 5. MySQL from Phase 5 onward. No
-framework yet, by design.
+- Java 21 (Amazon Corretto)
+- Maven
+- JUnit 5
+
+MySQL will be introduced in Phase 5. No framework is used yet, by
+design, so the project focuses on understanding the architecture
+before introducing Spring Boot.
 
 ## Running it
 
-Open the project in IntelliJ IDEA and run `Main.java` directly
-(right-click -> Run 'Main.main()'). Maven-based execution isn't
-configured yet -- that comes once the project is packaged as a
-proper artifact, later in the roadmap.
+Open the project in IntelliJ IDEA and run `Main.java` directly.
+
+Maven-based execution will be added later as the project evolves.
 
 ## Running tests
 
-Via IntelliJ's Maven tool window: `Lifecycle` -> `test`. (The `mvn`
-CLI isn't on PATH outside the IDE yet.)
+Using IntelliJ:
+
+`Maven → Lifecycle → test`
+
+or, if Maven is installed on your machine:
+
+```bash
+mvn test
+```
