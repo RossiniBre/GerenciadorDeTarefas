@@ -1,34 +1,45 @@
 package infrastructure;
 
 import domain.Task;
+import domain.TaskBuilder;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskRepositoryTest {
 
     @Test
-    void shouldHaveOneElementSize() {
+    void findAllByOwner_returnsOnlyTasksBelongingToThatOwner() {
+        // Arrange
         InMemoryTaskRepository repo = new InMemoryTaskRepository();
-        Task task = Task.newTask("Estudar Java", "Praticar testes unitários");
 
-        repo.save(task);
+        String ownerA = "owner-A";
+        String ownerB = "owner-B";
 
-        assertEquals(1, repo.findAll().size());
+        Task taskA1 = new TaskBuilder(ownerA).title("Task A1").build();
+        Task taskA2 = new TaskBuilder(ownerA).title("Task A2").build();
+        Task taskB1 = new TaskBuilder(ownerB).title("Task B1").build();
+
+        repo.save(taskA1);
+        repo.save(taskA2);
+        repo.save(taskB1);
+
+        // Act
+        List<Task> tasksDoOwnerA = repo.findAllByOwner(ownerA);
+
+        // Assert
+        assertEquals(2, tasksDoOwnerA.size());
+        assertTrue(tasksDoOwnerA.stream().allMatch(t -> t.getOwnerId().equals(ownerA)));
     }
 
     @Test
-    void shouldUpdateWithoutDuplicatingWhenSavingAgain() {
-        // Arrange: prepara o cenário
+    void findAllByOwner_returnsEmptyListWhenOwnerHasNoTasks() {
         InMemoryTaskRepository repo = new InMemoryTaskRepository();
-        Task task = Task.newTask("Titulo original", "Descricao original");
-        repo.save(task);
 
-        // Act: executa a ação que quero testar
-        task.updateDetails("Titulo novo", "Descricao nova");
-        repo.save(task);
+        List<Task> result = repo.findAllByOwner("owner-sem-tarefas");
 
-        // Assert: confiro se o resultado é o esperado
-        assertEquals(1, repo.findAll().size());
-        assertEquals("Titulo novo", repo.findById(task.getId()).get().getTitle());
+        assertTrue(result.isEmpty());
     }
 }

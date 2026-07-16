@@ -18,8 +18,14 @@ public class InMemoryTaskRepository implements TaskRepository {
     }
 
     @Override
-    public List<Task> findAll() {
-        return taskList;
+    public List<Task> findAllByOwner(String ownerId) {
+        List<Task> userTasklist = new ArrayList<>();
+        for (Task task : taskList){
+            if (task.getOwnerId().equals(ownerId)){
+                userTasklist.add(task);
+            }
+        }
+        return userTasklist;
     }
 
     @Override

@@ -10,8 +10,9 @@ public class UpdateTaskDetailsUseCase {
 
     public UpdateTaskDetailsUseCase(TaskRepository repo){ this.repo = repo; }
 
-    public Task execute(String title, String description, String id) {
+    public Task execute(String title, String description, String id, String requesterId) {
         Task task = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Tarefa não encontrada!"));
+        task.verifyOwnership(requesterId);
         task.updateDetails(title, description);
         return repo.save(task);
     }

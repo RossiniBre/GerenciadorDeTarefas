@@ -12,13 +12,13 @@ public class StartTaskUseCaseTest {
     void shouldStartPendingTask(){
         // Arrange
         InMemoryTaskRepository repo = new InMemoryTaskRepository();
-        Task existingTask = Task.newTask("Titulo original", "Descricao Original");
+        Task existingTask = Task.newTask("Titulo original", "Descricao Original", "owner-123");
         repo.save(existingTask);
         String existingId = existingTask.getId();
 
         // Act
         StartTaskUseCase useCase= new StartTaskUseCase(repo);
-        useCase.execute(existingId);
+        useCase.execute(existingId, "owner-123");
 
         // Assert
         TaskStatus status = repo.findById(existingId).orElseThrow().getStatus();

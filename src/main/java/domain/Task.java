@@ -9,8 +9,9 @@ public class Task {
     private String id;
     private TaskPriority priority;
     private TaskCategory category;
+    private String ownerId;
 
-    private Task(String title, String description, TaskStatus status, String id, TaskPriority priority, TaskCategory category){
+    private Task(String title, String description, TaskStatus status, String id, TaskPriority priority, TaskCategory category, String ownerId){
         if (title == null || title.isBlank()){
             throw new IllegalArgumentException("Título é obrigatório!");
         }
@@ -20,14 +21,18 @@ public class Task {
         this.id = id;
         this.priority = priority;
         this.category = category;
+        if (ownerId == null || ownerId.isBlank()){
+            throw new IllegalArgumentException("Tarefa sem dono!");
+        }
+        this.ownerId = ownerId;
     }
 
-    public static Task newTask(String title, String description){
-        return new Task(title, description, TaskStatus.PENDING, UUID.randomUUID().toString(), TaskPriority.LOW, TaskCategory.UNCATEGORIZED);
+    public static Task newTask(String title, String description, String ownerId){
+        return new Task(title, description, TaskStatus.PENDING, UUID.randomUUID().toString(), TaskPriority.LOW, TaskCategory.UNCATEGORIZED, ownerId);
     }
 
-    public static Task rebuiltedTask(String title, String description, TaskStatus status, String id, TaskPriority priority, TaskCategory category){
-        return new Task(title, description, status, id, priority, category);
+    public static Task rebuiltedTask(String title, String description, TaskStatus status, String id, TaskPriority priority, TaskCategory category, String ownerId){
+        return new Task(title, description, status, id, priority, category, ownerId);
     }
 
     // getters
@@ -37,6 +42,7 @@ public class Task {
     public String getId(){ return id; }
     public TaskPriority getPriority(){ return priority; }
     public TaskCategory getCategory(){ return category; }
+    public String getOwnerId(){ return ownerId; }
 
 
     // Iniciar/finalizar/Atualizar
@@ -75,8 +81,14 @@ public class Task {
         this.category = category;
     }
 
+    public void verifyOwnership(String requesterId) {
+        if (!this.ownerId.equals(requesterId)) {
+            throw new IllegalStateException("Você não tem permissão para modificar esta tarefa!");
+        }
+    }
+
     @Override
     public String toString(){
-        return "Task: " + title + " - Status: " + status + " - ID: " + id + " - Priority: " + priority + " - Category: " + category;
+        return "Task: " + title + " - Status: " + status + " - ID: " + id + " - Priority: " + priority + " - Category: " + category + " - OwnerId: " + ownerId;
     }
 }

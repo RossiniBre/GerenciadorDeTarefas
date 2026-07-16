@@ -10,8 +10,9 @@ public class CompleteTaskUseCase {
         this.repo = repo;
     }
 
-    public void execute(String id) {
+    public void execute(String id, String requesterId) {
         Task task = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Tarefa não encontrada!"));
+        task.verifyOwnership(requesterId);
         task.completeTask();
         repo.save(task);
     }

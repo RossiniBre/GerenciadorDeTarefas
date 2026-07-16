@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TaskBuilderTest {
 
+    private static final String OWNER_ID = "owner-123";
+
     @Test
     void shouldBuildTaskWithDefaultsWhenPriorityAndCategoryNotSet() {
-        Task task = new TaskBuilder()
+        Task task = new TaskBuilder(OWNER_ID)
                 .title("Estudar Java")
                 .description("2h por dia")
                 .build();
@@ -17,11 +19,12 @@ class TaskBuilderTest {
         assertEquals(TaskPriority.LOW, task.getPriority());
         assertEquals(TaskCategory.UNCATEGORIZED, task.getCategory());
         assertEquals(TaskStatus.PENDING, task.getStatus());
+        assertEquals(OWNER_ID, task.getOwnerId());
     }
 
     @Test
     void shouldBuildTaskWithCustomPriorityAndCategory() {
-        Task task = new TaskBuilder()
+        Task task = new TaskBuilder(OWNER_ID)
                 .title("Reunião de projeto")
                 .description("Alinhar escopo com o time")
                 .priority(TaskPriority.HIGH)
@@ -34,7 +37,7 @@ class TaskBuilderTest {
 
     @Test
     void shouldBuildTaskWithOnlyPriorityCustomized() {
-        Task task = new TaskBuilder()
+        Task task = new TaskBuilder(OWNER_ID)
                 .title("Ler artigo")
                 .priority(TaskPriority.MEDIUM)
                 .build();
@@ -45,8 +48,16 @@ class TaskBuilderTest {
 
     @Test
     void shouldThrowWhenTitleIsMissing() {
-        TaskBuilder builder = new TaskBuilder()
+        TaskBuilder builder = new TaskBuilder(OWNER_ID)
                 .description("Sem título definido");
+
+        assertThrows(IllegalArgumentException.class, builder::build);
+    }
+
+    @Test
+    void shouldThrowWhenOwnerIdIsMissing() {
+        TaskBuilder builder = new TaskBuilder(null)
+                .title("Tarefa órfã");
 
         assertThrows(IllegalArgumentException.class, builder::build);
     }

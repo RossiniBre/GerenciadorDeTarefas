@@ -1,10 +1,15 @@
 package domain;
 
 public class TaskBuilder {
+    private final String ownerId;
     private String title;
     private String description;
     private TaskPriority priority;
     private TaskCategory category;
+
+    public TaskBuilder (String ownerId){
+        this.ownerId = ownerId;
+    }
 
     public TaskBuilder title(String title) {
         this.title = title;
@@ -27,7 +32,7 @@ public class TaskBuilder {
     }
 
     public Task build() {
-        Task task = Task.newTask(title, description);
+        Task task = Task.newTask(title, description, ownerId);
 
         if (priority != null) {
             task.updatePriority(priority);

@@ -11,16 +11,16 @@ public class DeleteTaskUseCaseTest {
     void shouldDeleteTask(){
         //Arrange
         InMemoryTaskRepository repo = new InMemoryTaskRepository();
-        Task existingTask = Task.newTask("Titulo original", "Descricao Original");
+        Task existingTask = Task.newTask("Titulo original", "Descricao Original", "owner-123");
         repo.save(existingTask);
         String existingId = existingTask.getId();
 
         DeleteTaskUseCase useCase = new DeleteTaskUseCase(repo);
 
         // Act
-        useCase.execute(existingId);
+        useCase.execute(existingId, "owner-123");
 
         // Assert
-        assertEquals(0, repo.findAll().size());
+        assertEquals(0, repo.findAllByOwner("owner-123").size());
     }
 }

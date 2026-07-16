@@ -2,6 +2,7 @@ package application;
 
 import domain.Task;
 import domain.TaskStatus;
+import domain.User;
 import infrastructure.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,13 +11,14 @@ class CreateTaskUseCaseTest {
 
     @Test
     void shouldCreateTaskWithPendingStatus() {
-        // Arrange: o que você precisa instanciar aqui?
+        // Arrange
         InMemoryTaskRepository repo = new InMemoryTaskRepository();
         CreateTaskUseCase useCase = new CreateTaskUseCase(repo);
-        // Act: chama o execute
-        Task task = useCase.execute("Titulo original", "Descricao original");
+        // Act
+        User owner = User.newUser("owner-123", "hash-fake-123");
+        Task task = useCase.execute("Titulo original", "Descricao original", owner);
 
-        // Assert: confere título, descrição e status
+        // Assert
         assertEquals("Titulo original", task.getTitle());
         assertEquals("Descricao original", task.getDescription());
         assertEquals(TaskStatus.PENDING, task.getStatus());
