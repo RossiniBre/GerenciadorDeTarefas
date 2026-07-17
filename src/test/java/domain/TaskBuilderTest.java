@@ -1,5 +1,6 @@
 package domain;
 
+import domain.exceptions.InvalidFieldException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,7 +52,7 @@ class TaskBuilderTest {
         TaskBuilder builder = new TaskBuilder(OWNER_ID)
                 .description("Sem título definido");
 
-        assertThrows(IllegalArgumentException.class, builder::build);
+        assertThrows(InvalidFieldException.class, builder::build);
     }
 
     @Test
@@ -59,6 +60,6 @@ class TaskBuilderTest {
         TaskBuilder builder = new TaskBuilder(null)
                 .title("Tarefa órfã");
 
-        assertThrows(IllegalArgumentException.class, builder::build);
+        assertThrows(InvalidFieldException.class, builder::build);
     }
 }

@@ -12,7 +12,7 @@ public class User {
             throw new IllegalArgumentException("Nome de usuário é obrigatório!");
         }
         if (passwordHash == null || passwordHash.isBlank()){
-            throw new IllegalArgumentException("Senha é obrigatório!");
+            throw new IllegalArgumentException("Senha é obrigatória!");
         }
         this.id = id;
         this.username = username;

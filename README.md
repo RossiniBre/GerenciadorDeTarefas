@@ -46,7 +46,7 @@ The project intentionally starts without Spring Boot or a database so every arch
 
 ---
 
-## Phase 4 — Users and task ownership (In Progress)
+## Phase 4 — Users, task ownership and authentication (Done)
 
 - `User` entity
 - `UserRepository` interface
@@ -56,21 +56,31 @@ The project intentionally starts without Spring Boot or a database so every arch
 - Ownership propagated automatically during task creation
 - `TaskRepository.findAllByOwner(...)`
 - End-to-end ownership flow validated:
-
-```
-User
-      ↓
-CreateTaskUseCase
-      ↓
-Task (ownerId)
-      ↓
-TaskRepository
-      ↓
-findAllByOwner(ownerId)
-```
+  User
+  ↓
+  CreateTaskUseCase
+  ↓
+  Task (ownerId)
+  ↓
+  TaskRepository
+  ↓
+  findAllByOwner(ownerId)
 
 - Ownership verification added to every task use case, preventing users from accessing or modifying tasks they do not own
 - `PasswordHasher` strategy interface introduced in preparation for authentication
+- `Pbkdf2PasswordHasher` implementation using PBKDF2WithHmacSHA256, with salted, iterated password hashing
+- `RegisterUserUseCase`, validating input, preventing duplicate usernames, and hashing passwords before persistence
+- `LoginUseCase`, verifying credentials against stored password hashes and returning the authenticated `User`
+- Unit tests covering `RegisterUserUseCase` and `LoginUseCase` (success and failure paths)
+- End-to-end authentication flow validated manually via `Main`, including the failed-login path
+- Domain exception hierarchy introduced (`DomainException` and subclasses), replacing generic `IllegalArgumentException`/`IllegalStateException` for business rule violations:
+  - `InvalidFieldException`
+  - `DuplicateUsernameException`
+  - `InvalidCredentialsException`
+  - `TaskNotFoundException`
+  - `UnauthorizedTaskAccessException`
+  - `InvalidTaskStateException`
+- Constructor-level validation (missing dependencies) intentionally kept as `IllegalArgumentException`, since it represents a programming/composition error, not a domain rule violation
 - Existing unit tests updated and all passing
 
 ---
@@ -88,18 +98,30 @@ src/main/java/
 │   ├── TaskPriority.java
 │   ├── TaskRepository.java
 │   ├── UserRepository.java
-│   └── PasswordHasher.java
+│   ├── PasswordHasher.java
+│   ├── CredentialsValidator.java
+│   └── exceptions/
+│       ├── DomainException.java
+│       ├── InvalidFieldException.java
+│       ├── DuplicateUsernameException.java
+│       ├── InvalidCredentialsException.java
+│       ├── TaskNotFoundException.java
+│       ├── UnauthorizedTaskAccessException.java
+│       └── InvalidTaskStateException.java
 │
 ├── application/
 │   ├── CreateTaskUseCase.java
 │   ├── UpdateTaskDetailsUseCase.java
 │   ├── DeleteTaskUseCase.java
 │   ├── StartTaskUseCase.java
-│   └── CompleteTaskUseCase.java
+│   ├── CompleteTaskUseCase.java
+│   ├── RegisterUserUseCase.java
+│   └── LoginUseCase.java
 │
 └── infrastructure/
     ├── InMemoryTaskRepository.java
     ├── InMemoryUserRepository.java
+    ├── Pbkdf2PasswordHasher.java
     └── Main.java
 
 src/test/java/
@@ -107,14 +129,11 @@ src/test/java/
 ```
 
 Dependency direction always points inward:
-
-```
 Infrastructure
-        ↓
+↓
 Application
-        ↓
+↓
 Domain
-```
 
 The domain layer has no knowledge of infrastructure or framework-specific code.
 
@@ -128,7 +147,8 @@ The domain layer has no knowledge of infrastructure or framework-specific code.
 | Static Factory | Centralize entity creation and validation |
 | Builder | Create complex objects through a fluent API |
 | Dependency Injection | Decouple use cases from concrete implementations |
-| Strategy (preparation) | Password hashing abstraction |
+| Strategy | Password hashing abstraction (`PasswordHasher` / `Pbkdf2PasswordHasher`) |
+| Exception Hierarchy | Represent domain-specific error conditions explicitly, replacing generic exceptions |
 
 Additional patterns will be introduced as the project evolves.
 
@@ -136,16 +156,16 @@ Additional patterns will be introduced as the project evolves.
 
 # Roadmap
 
-| Phase | Status | Scope | Main Pattern |
-|-------|-------|-------|--------------|
-| 1 | Done | Task creation and in-memory persistence | Repository, Static Factory |
-| 2 | Done | Updating, deleting and testing | — |
-| 3 | Done | Categories, priorities and Builder | Builder |
-| 4 | In Progress | Users, task ownership and authentication | Strategy |
-| 5 | | REST API + MySQL persistence | Adapter |
-| 6 | | AI-assisted task creation from free text | Strategy |
-| 7 | | Notifications | Observer |
-| 8 | | Migration to Spring Boot | — |
+| Phase | Status      | Scope | Main Pattern |
+|-------|-------------|-------|--------------|
+| 1 | Done        | Task creation and in-memory persistence | Repository, Static Factory |
+| 2 | Done        | Updating, deleting and testing | — |
+| 3 | Done        | Categories, priorities and Builder | Builder |
+| 4 | Done        | Users, task ownership and authentication | Strategy, Dependency Injection |
+| 5 | In Progress | REST API + MySQL persistence | Adapter |
+| 6 |             | AI-assisted task creation from free text | Strategy |
+| 7 |             | Notifications | Observer |
+| 8 |             | Migration to Spring Boot | — |
 
 ---
 
