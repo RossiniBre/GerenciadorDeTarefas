@@ -85,6 +85,15 @@ The project intentionally starts without Spring Boot or a database so every arch
 
 ---
 
+## Phase 5 — REST API + MySQL persistence (In Progress)
+
+- `MySqlTaskRepository` implementing `TaskRepository` using JDBC (`PreparedStatement`, upsert via `ON DUPLICATE KEY UPDATE`)
+- `DatabaseConfig` loading connection settings from environment variables (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`)
+- `DatabaseConfig.getUrl()` building the JDBC connection URL from its own fields
+- `Main` wired to open a real `Connection` via `DriverManager` and instantiate `MySqlTaskRepository`
+- Local development environment configured with Docker Desktop (WSL2 backend)
+- Pending: MySQL container, `taskmanager` database schema, and `tasks` table creation
+
 # Architecture
 
 ```text

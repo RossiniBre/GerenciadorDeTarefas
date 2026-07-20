@@ -1,42 +1,30 @@
-import application.RegisterUserUseCase;
-import application.LoginUseCase;
 import application.CreateTaskUseCase;
-import domain.*;
-import infrastructure.InMemoryTaskRepository;
-import infrastructure.InMemoryUserRepository;
-import infrastructure.Pbkdf2PasswordHasher;
+import domain.Task;
+import domain.TaskRepository;
+import domain.User;
+import infrastructure.MySqlTaskRepository;
+import infrastructure.DatabaseConfig;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) {
-        TaskRepository repo = new InMemoryTaskRepository();
-        CreateTaskUseCase useCase = new CreateTaskUseCase(repo);
+    public static void main(String[] args) throws SQLException {
+        DatabaseConfig config = DatabaseConfig.load();
+        Connection connection = DriverManager.getConnection(config.getUrl(), config.getUser(), config.getPassword());
 
-        UserRepository userRepository = new InMemoryUserRepository();
-        PasswordHasher passwordHasher = new Pbkdf2PasswordHasher();
-
-        RegisterUserUseCase registerUserUseCase = new RegisterUserUseCase(userRepository, passwordHasher);
-        LoginUseCase loginUseCase = new LoginUseCase(userRepository, passwordHasher);
+        TaskRepository sqlRepo = new MySqlTaskRepository(connection);
+        CreateTaskUseCase useCase = new CreateTaskUseCase(sqlRepo);
         
-        registerUserUseCase.execute("joao123", "minhaSenha123");
-        System.out.println("Usuário registrado com sucesso.");
+        User fakeUser = new User("teste-user-id", "usuarioTeste", "hashFake");
 
-        User loggedUser = loginUseCase.execute("joao123", "minhaSenha123");
-        System.out.println("Login bem-sucedido: " + loggedUser.getUsername());
+        Task t = useCase.execute("Estudar Java", "Testar conexão MySQL", fakeUser);
+        System.out.println("Task criada: " + t);
 
-        // Login com senha errada (caminho de erro)
-        try {
-            loginUseCase.execute("joao123", "senhaErrada");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Falha esperada no login: " + e.getMessage());
-        }
-
-        Task t = useCase.execute("Estudar Java", "Revisar Fase 4", loggedUser);
-
-        System.out.println(t);
-        List<Task> tasksDoUser = repo.findAllByOwner(loggedUser.getId());
-        for (Task task : tasksDoUser) {
+        List<Task> tasks = sqlRepo.findAllByOwner(fakeUser.getId());
+        for (Task task : tasks) {
             System.out.println("- " + task.getTitle());
         }
     }
