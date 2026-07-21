@@ -85,14 +85,19 @@ The project intentionally starts without Spring Boot or a database so every arch
 
 ---
 
-## Phase 5 — REST API + MySQL persistence (In Progress)
+## Phase 5 — MySQL persistence + querying (In Progress)
 
-- `MySqlTaskRepository` implementing `TaskRepository` using JDBC (`PreparedStatement`, upsert via `ON DUPLICATE KEY UPDATE`)
+- MySQL running in a Docker container (WSL2 backend), with `users` and `tasks` tables created
 - `DatabaseConfig` loading connection settings from environment variables (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`)
 - `DatabaseConfig.getUrl()` building the JDBC connection URL from its own fields
-- `Main` wired to open a real `Connection` via `DriverManager` and instantiate `MySqlTaskRepository`
-- Local development environment configured with Docker Desktop (WSL2 backend)
-- Pending: MySQL container, `taskmanager` database schema, and `tasks` table creation
+- `MySqlTaskRepository` implementing `TaskRepository` using JDBC (`PreparedStatement`, upsert via `ON DUPLICATE KEY UPDATE`)
+- `MySqlUserRepository` implementing `UserRepository` using JDBC, following the same pattern (`save`, `findByUsername`, `deleteAccount`)
+- `users` table enforcing a `UNIQUE` constraint on `username` as defense in depth alongside application-level duplicate checking
+- `Main` wired to open a real `Connection` via `DriverManager` and exercise the full flow end-to-end: register → login (success and failure paths) → task creation → persistence, all against real MySQL
+- `Pbkdf2PasswordHasher` hardened: constant-time hash comparison via `MessageDigest.isEqual` (replacing `Arrays.equals`) to mitigate timing attacks, and iteration count raised from 65,536 to 600,000 in line with current OWASP guidance
+- `ListTasksUseCase` introduced, supporting combinable, optional filtering by status, priority, and category, with results sorted by priority (highest first)
+- End-to-end filtering flow validated manually via `Main`, confirming that combined filters (e.g. status + priority + category) narrow results correctly rather than only applying independently
+- Pending: REST API layer (currently all flows are exercised through `Main`, not HTTP endpoints)
 
 # Architecture
 
@@ -124,13 +129,18 @@ src/main/java/
 │   ├── DeleteTaskUseCase.java
 │   ├── StartTaskUseCase.java
 │   ├── CompleteTaskUseCase.java
+│   ├── ListTasksUseCase.java
 │   ├── RegisterUserUseCase.java
 │   └── LoginUseCase.java
 │
 └── infrastructure/
     ├── InMemoryTaskRepository.java
     ├── InMemoryUserRepository.java
+    ├── MySqlTaskRepository.java
+    ├── MySqlUserRepository.java
+    ├── DatabaseConfig.java
     ├── Pbkdf2PasswordHasher.java
+    ├── RepositoryException.java
     └── Main.java
 
 src/test/java/
@@ -171,7 +181,7 @@ Additional patterns will be introduced as the project evolves.
 | 2 | Done        | Updating, deleting and testing | — |
 | 3 | Done        | Categories, priorities and Builder | Builder |
 | 4 | Done        | Users, task ownership and authentication | Strategy, Dependency Injection |
-| 5 | In Progress | REST API + MySQL persistence | Adapter |
+| 5 | In Progress | MySQL persistence, filtering/querying, and REST API | Adapter |
 | 6 |             | AI-assisted task creation from free text | Strategy |
 | 7 |             | Notifications | Observer |
 | 8 |             | Migration to Spring Boot | — |
@@ -183,10 +193,7 @@ Additional patterns will be introduced as the project evolves.
 - Java 21 (Amazon Corretto)
 - Maven
 - JUnit 5
-
-Current persistence is entirely in memory.
-
-MySQL will be introduced in Phase 5 after the architecture is fully established.
+- MySQL 8 (Docker, WSL2 backend)
 
 Spring Boot will only be introduced later so the project focuses on architecture before framework conventions.
 
@@ -199,6 +206,8 @@ Open the project in IntelliJ IDEA and run:
 ```text
 Main.java
 ```
+
+Requires a running MySQL instance and the following environment variables configured (e.g. via IntelliJ Run Configuration): `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`.
 
 A Maven entry point may be added in future phases.
 

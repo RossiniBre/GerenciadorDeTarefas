@@ -43,7 +43,7 @@ public class MySqlTaskRepository implements TaskRepository {
 
     @Override
     public List<Task> findAllByOwner(String ownerId) {
-        String sql = "SELECT * FROM Tasks WHERE owner_id = ?";
+        String sql = "SELECT * FROM tasks WHERE owner_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)){
             List<Task> allTasks = new ArrayList<>();
@@ -71,7 +71,7 @@ public class MySqlTaskRepository implements TaskRepository {
 
     @Override
     public Optional<Task> findById(String id) {
-        String sql = "SELECT * FROM Tasks WHERE Id = ?";
+        String sql = "SELECT * FROM tasks WHERE Id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)){
             ps.setString(1, id);
@@ -99,7 +99,7 @@ public class MySqlTaskRepository implements TaskRepository {
 
     @Override
     public void removeTask(String id){
-        String sql = "DELETE FROM Tasks WHERE id = ?";
+        String sql = "DELETE FROM tasks WHERE id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)){
             ps.setString(1, id);

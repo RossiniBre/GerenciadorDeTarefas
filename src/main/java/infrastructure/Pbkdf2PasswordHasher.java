@@ -5,13 +5,13 @@ import domain.PasswordHasher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.Arrays;
 
 public class Pbkdf2PasswordHasher implements PasswordHasher {
 
-    private static final int ITERATIONS = 65536;
+    private static final int ITERATIONS = 600_000;
 
     @Override
     public String hash(String rawPassword) {
@@ -65,6 +65,6 @@ public class Pbkdf2PasswordHasher implements PasswordHasher {
 
         byte[] hashBytes = key.getEncoded();
 
-        return Arrays.equals(savedHash, hashBytes);
+        return MessageDigest.isEqual(savedHash, hashBytes);
     }
 }
