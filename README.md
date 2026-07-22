@@ -1,8 +1,8 @@
 # Task Manager
 
-A task management backend built incrementally to learn **Clean Architecture**, **SOLID**, **Design Patterns**, **Domain-Driven Design principles**, and **Spec-Driven Development** using plain Java before introducing frameworks.
+A task management backend built incrementally to learn **Clean Architecture**, **SOLID**, **Design Patterns**, **Domain-Driven Design (DDD)**, and **Spec-Driven Development** using plain Java before introducing frameworks.
 
-The project intentionally starts without Spring Boot or a database so every architectural decision can be understood from first principles.
+Instead of relying on Spring Boot from the beginning, every architectural decision is implemented manually first, making it possible to understand how a backend actually works under the hood.
 
 ---
 
@@ -10,151 +10,175 @@ The project intentionally starts without Spring Boot or a database so every arch
 
 ## Phase 1 — Foundation
 
-- `Task` entity with constructor validation and a Static Factory Method (`Task.newTask(...)`)
+- `Task` entity with constructor validation
+- Static Factory Method (`Task.newTask(...)`)
 - `TaskStatus` enum
 - `TaskRepository` interface (Repository Pattern)
-- `InMemoryTaskRepository` implementation
-- `CreateTaskUseCase` using constructor injection (Dependency Inversion)
-- `Main` as the composition root
+- `InMemoryTaskRepository`
+- `CreateTaskUseCase`
+- Constructor Dependency Injection
+- Composition Root (`Main`)
 
 ---
 
 ## Phase 2 — Updating, deleting and testing
 
-- `Task.updateDetails(...)` with the same validation rules used during creation
 - `UpdateTaskDetailsUseCase`
 - `DeleteTaskUseCase`
 - `StartTaskUseCase`
 - `CompleteTaskUseCase`
-- Safe status transitions enforced inside the domain entity
-- `InMemoryTaskRepository.save(...)` performs upsert instead of always inserting
+- Safe task status transitions enforced inside the domain
+- Repository upsert behavior
 - JUnit 5 configured with Maven
-- Unit tests covering repositories and application use cases
+- Unit tests covering repositories and use cases
 
 ---
 
 ## Phase 3 — Categories, priorities and Builder
 
-- `TaskCategory` enum
-- `TaskPriority` enum
-- Category and priority support inside `Task`
-- Fail-fast validation for every mutable field
-- `TaskBuilder` with fluent method chaining
-- Builder delegates object creation to `Task.newTask(...)`, avoiding duplicated construction logic
-- Existing use cases updated to support the new fields
-- Existing unit tests updated and all passing
+- `TaskCategory`
+- `TaskPriority`
+- Builder Pattern (`TaskBuilder`)
+- Fluent API
+- Fail-fast validation for mutable fields
+- Existing use cases updated
+- Existing tests updated
 
 ---
 
-## Phase 4 — Users, task ownership and authentication (Done)
+## Phase 4 — Users, ownership and authentication
+
+### Users
 
 - `User` entity
-- `UserRepository` interface
+- `UserRepository`
 - `InMemoryUserRepository`
-- `Task` now stores the owner's identifier (`ownerId`)
-- `TaskBuilder` requires an `ownerId`
-- Ownership propagated automatically during task creation
-- `TaskRepository.findAllByOwner(...)`
-- End-to-end ownership flow validated:
-  User
-  ↓
-  CreateTaskUseCase
-  ↓
-  Task (ownerId)
-  ↓
-  TaskRepository
-  ↓
-  findAllByOwner(ownerId)
 
-- Ownership verification added to every task use case, preventing users from accessing or modifying tasks they do not own
-- `PasswordHasher` strategy interface introduced in preparation for authentication
-- `Pbkdf2PasswordHasher` implementation using PBKDF2WithHmacSHA256, with salted, iterated password hashing
-- `RegisterUserUseCase`, validating input, preventing duplicate usernames, and hashing passwords before persistence
-- `LoginUseCase`, verifying credentials against stored password hashes and returning the authenticated `User`
-- Unit tests covering `RegisterUserUseCase` and `LoginUseCase` (success and failure paths)
-- End-to-end authentication flow validated manually via `Main`, including the failed-login path
-- Domain exception hierarchy introduced (`DomainException` and subclasses), replacing generic `IllegalArgumentException`/`IllegalStateException` for business rule violations:
-  - `InvalidFieldException`
-  - `DuplicateUsernameException`
-  - `InvalidCredentialsException`
-  - `TaskNotFoundException`
-  - `UnauthorizedTaskAccessException`
-  - `InvalidTaskStateException`
-- Constructor-level validation (missing dependencies) intentionally kept as `IllegalArgumentException`, since it represents a programming/composition error, not a domain rule violation
-- Existing unit tests updated and all passing
+### Task ownership
+
+- Tasks now belong to an owner (`ownerId`)
+- Ownership propagated automatically during creation
+- `findAllByOwner(...)`
+- Authorization enforced across every task use case
+
+### Authentication
+
+- `PasswordHasher` strategy
+- `Pbkdf2PasswordHasher`
+- `RegisterUserUseCase`
+- `LoginUseCase`
+- Password hashing with PBKDF2-HMAC-SHA256
+- Duplicate username protection
+- Authentication flow validated end-to-end
+
+### Domain exceptions
+
+Generic exceptions were replaced with domain-specific exceptions:
+
+- `InvalidFieldException`
+- `DuplicateUsernameException`
+- `InvalidCredentialsException`
+- `TaskNotFoundException`
+- `UnauthorizedTaskAccessException`
+- `InvalidTaskStateException`
+
+Programming/configuration errors intentionally remain `IllegalArgumentException`.
 
 ---
 
-## Phase 5 — MySQL persistence + querying (In Progress)
+## Phase 5 — MySQL persistence and REST API
 
-- MySQL running in a Docker container (WSL2 backend), with `users` and `tasks` tables created
-- `DatabaseConfig` loading connection settings from environment variables (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`)
-- `DatabaseConfig.getUrl()` building the JDBC connection URL from its own fields
-- `MySqlTaskRepository` implementing `TaskRepository` using JDBC (`PreparedStatement`, upsert via `ON DUPLICATE KEY UPDATE`)
-- `MySqlUserRepository` implementing `UserRepository` using JDBC, following the same pattern (`save`, `findByUsername`, `deleteAccount`)
-- `users` table enforcing a `UNIQUE` constraint on `username` as defense in depth alongside application-level duplicate checking
-- `Main` wired to open a real `Connection` via `DriverManager` and exercise the full flow end-to-end: register → login (success and failure paths) → task creation → persistence, all against real MySQL
-- `Pbkdf2PasswordHasher` hardened: constant-time hash comparison via `MessageDigest.isEqual` (replacing `Arrays.equals`) to mitigate timing attacks, and iteration count raised from 65,536 to 600,000 in line with current OWASP guidance
-- `ListTasksUseCase` introduced, supporting combinable, optional filtering by status, priority, and category, with results sorted by priority (highest first)
-- End-to-end filtering flow validated manually via `Main`, confirming that combined filters (e.g. status + priority + category) narrow results correctly rather than only applying independently
-- Pending: REST API layer (currently all flows are exercised through `Main`, not HTTP endpoints)
+### Persistence
+
+- MySQL 8 running in Docker
+- JDBC repositories
+- `DatabaseConfig`
+- Environment-based configuration
+- Repository upsert using `ON DUPLICATE KEY UPDATE`
+- UNIQUE constraint for usernames
+- Secure password comparison using `MessageDigest.isEqual`
+- PBKDF2 iteration count increased to 600,000 (OWASP recommendation)
+
+### Querying
+
+- `ListTasksUseCase`
+- Optional filtering by:
+  - status
+  - priority
+  - category
+- Combined filters
+- Results ordered by priority
+
+### HTTP API (without frameworks)
+
+A lightweight HTTP layer was implemented using Java's built-in HTTP server.
+
+Implemented components:
+
+- `ApiServer`
+- `TasksHandler`
+- `CreateTaskAction`
+- `ListTasksAction`
+- Request/Response DTOs
+- JSON abstraction (`JsonMapper`)
+- Gson implementation (`GsonJsonMapper`)
+- `HttpJson` helper
+
+Current endpoints:
+
+- `POST /tasks`
+- `GET /tasks`
+
+The HTTP layer follows the Adapter pattern, keeping the application and domain layers completely independent of transport concerns.
+
+---
 
 # Architecture
 
 ```text
-src/main/java/
-├── domain/
-│   ├── Task.java
-│   ├── User.java
-│   ├── TaskBuilder.java
-│   ├── TaskStatus.java
-│   ├── TaskCategory.java
-│   ├── TaskPriority.java
-│   ├── TaskRepository.java
-│   ├── UserRepository.java
-│   ├── PasswordHasher.java
-│   ├── CredentialsValidator.java
-│   └── exceptions/
-│       ├── DomainException.java
-│       ├── InvalidFieldException.java
-│       ├── DuplicateUsernameException.java
-│       ├── InvalidCredentialsException.java
-│       ├── TaskNotFoundException.java
-│       ├── UnauthorizedTaskAccessException.java
-│       └── InvalidTaskStateException.java
+src/main/java
 │
-├── application/
-│   ├── CreateTaskUseCase.java
-│   ├── UpdateTaskDetailsUseCase.java
-│   ├── DeleteTaskUseCase.java
-│   ├── StartTaskUseCase.java
-│   ├── CompleteTaskUseCase.java
-│   ├── ListTasksUseCase.java
-│   ├── RegisterUserUseCase.java
-│   └── LoginUseCase.java
+├── domain
+│   ├── model
+│   ├── repository
+│   ├── services
+│   └── exceptions
 │
-└── infrastructure/
-    ├── InMemoryTaskRepository.java
-    ├── InMemoryUserRepository.java
-    ├── MySqlTaskRepository.java
-    ├── MySqlUserRepository.java
-    ├── DatabaseConfig.java
-    ├── Pbkdf2PasswordHasher.java
-    ├── RepositoryException.java
-    └── Main.java
-
-src/test/java/
-└── ...
+├── application
+│   └── usecases
+│
+├── infrastructure
+│   ├── http
+│   │   ├── dto
+│   │   ├── ApiServer
+│   │   ├── TasksHandler
+│   │   ├── CreateTaskAction
+│   │   ├── ListTasksAction
+│   │   ├── JsonMapper
+│   │   ├── GsonJsonMapper
+│   │   └── HttpJson
+│   │
+│   ├── DatabaseConfig
+│   ├── MySqlTaskRepository
+│   ├── MySqlUserRepository
+│   ├── InMemoryTaskRepository
+│   ├── InMemoryUserRepository
+│   └── Pbkdf2PasswordHasher
+│
+└── Main
 ```
 
-Dependency direction always points inward:
-Infrastructure
-↓
-Application
-↓
-Domain
+Dependency direction always points inward.
 
-The domain layer has no knowledge of infrastructure or framework-specific code.
+```
+Infrastructure
+        ↓
+Application
+        ↓
+Domain
+```
+
+The domain layer has no dependency on frameworks, HTTP, JDBC, or JSON libraries.
 
 ---
 
@@ -162,88 +186,98 @@ The domain layer has no knowledge of infrastructure or framework-specific code.
 
 | Pattern | Purpose |
 |----------|---------|
-| Repository | Abstract persistence from the application layer |
-| Static Factory | Centralize entity creation and validation |
-| Builder | Create complex objects through a fluent API |
-| Dependency Injection | Decouple use cases from concrete implementations |
-| Strategy | Password hashing abstraction (`PasswordHasher` / `Pbkdf2PasswordHasher`) |
-| Exception Hierarchy | Represent domain-specific error conditions explicitly, replacing generic exceptions |
-
-Additional patterns will be introduced as the project evolves.
+| Repository | Persistence abstraction |
+| Static Factory | Controlled entity creation |
+| Builder | Fluent object construction |
+| Dependency Injection | Decoupling use cases |
+| Strategy | Password hashing |
+| Adapter | HTTP layer and JDBC implementations |
+| Exception Hierarchy | Explicit domain errors |
 
 ---
 
 # Roadmap
 
-| Phase | Status      | Scope | Main Pattern |
-|-------|-------------|-------|--------------|
-| 1 | Done        | Task creation and in-memory persistence | Repository, Static Factory |
-| 2 | Done        | Updating, deleting and testing | — |
-| 3 | Done        | Categories, priorities and Builder | Builder |
-| 4 | Done        | Users, task ownership and authentication | Strategy, Dependency Injection |
-| 5 | In Progress | MySQL persistence, filtering/querying, and REST API | Adapter |
-| 6 |             | AI-assisted task creation from free text | Strategy |
-| 7 |             | Notifications | Observer |
-| 8 |             | Migration to Spring Boot | — |
+| Phase | Status | Scope |
+|--------|------|-------|
+| 1 | Done | Task creation |
+| 2 | Done | Update, delete, tests |
+| 3 | Done | Categories, priorities, Builder |
+| 4 | Done | Users, authentication, authorization |
+| 5 | In Progress | MySQL, REST API, HTTP adapters |
+| 6 | | AI-assisted task creation |
+| 7 | | Notifications |
+| 8 | | Migration to Spring Boot |
 
 ---
 
 # Tech Stack
 
-- Java 21 (Amazon Corretto)
+- Java 21
 - Maven
 - JUnit 5
-- MySQL 8 (Docker, WSL2 backend)
-
-Spring Boot will only be introduced later so the project focuses on architecture before framework conventions.
+- MySQL 8
+- JDBC
+- Gson
+- Java Built-in HTTP Server (`com.sun.net.httpserver.HttpServer`)
+- Docker
+- WSL2
 
 ---
 
 # Running the Project
 
-Open the project in IntelliJ IDEA and run:
+Run:
 
-```text
+```
 Main.java
 ```
 
-Requires a running MySQL instance and the following environment variables configured (e.g. via IntelliJ Run Configuration): `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`.
+Requirements:
 
-A Maven entry point may be added in future phases.
+- MySQL running
+- Environment variables:
+
+```
+DB_HOST
+DB_PORT
+DB_USER
+DB_PASSWORD
+```
+
+The HTTP server starts locally and exposes the REST endpoints.
 
 ---
 
 # Running the Tests
 
-Using IntelliJ:
-
-```text
-Maven → Lifecycle → test
-```
-
-Or from the command line:
+Using Maven:
 
 ```bash
 mvn test
+```
+
+Or through IntelliJ:
+
+```
+Lifecycle → test
 ```
 
 ---
 
 # Project Goals
 
-This project is being developed as a long-term learning exercise focused on backend engineering.
+The objective is to build a production-style backend while introducing one architectural concept at a time.
 
-Each phase introduces one new architectural concept while preserving the previous ones, allowing the codebase to evolve incrementally rather than becoming a complete application from day one.
-
-The final objective is to build a backend featuring:
+The final project will include:
 
 - Clean Architecture
-- SOLID principles
+- SOLID
 - Design Patterns
+- REST API
 - Authentication
 - Authorization
-- REST API
-- MySQL persistence
+- MySQL
 - AI-assisted task creation
 - Spring Boot
 - Comprehensive automated tests
