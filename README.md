@@ -128,6 +128,17 @@ Current endpoints:
 
 - `POST /tasks`
 - `GET /tasks`
+- `PATCH /tasks/{id}`
+- `DELETE /tasks/{id}`
+
+Implemented features:
+
+- Partial task updates using `PATCH`
+- Unified task update flow through a single use case
+- URL path parameter parsing for resource identification
+- HTTP method routing (`POST`, `GET`, `PATCH`, `DELETE`)
+- Request/Response DTO mapping
+- Transport-independent application layer
 
 The HTTP layer follows the Adapter pattern, keeping the application and domain layers completely independent of transport concerns.
 
@@ -154,6 +165,8 @@ src/main/java
 │   │   ├── TasksHandler
 │   │   ├── CreateTaskAction
 │   │   ├── ListTasksAction
+│   │   ├── UpdateTaskAction
+│   │   ├── DeleteTaskAction
 │   │   ├── JsonMapper
 │   │   ├── GsonJsonMapper
 │   │   └── HttpJson

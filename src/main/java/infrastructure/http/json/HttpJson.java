@@ -20,9 +20,13 @@ public final class HttpJson {
     public static void sendResponse(HttpExchange exchange, int statusCode, String body) throws IOException {
         byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(statusCode, bytes.length);
+        if (bytes.length == 0) {
+            exchange.sendResponseHeaders(statusCode, -1);
+        } else {
+            exchange.sendResponseHeaders(statusCode, bytes.length);
+        }
         try (OutputStream os = exchange.getResponseBody()) {
-            os.write(bytes);
+            if (bytes.length > 0) os.write(bytes);
         }
     }
 
@@ -36,5 +40,16 @@ public final class HttpJson {
             params.put(key, value);
         }
         return params;
+    }
+
+    public static String extractedId(String path, String prefix){
+        if (!path.startsWith(prefix)){
+            throw new IllegalArgumentException("Os caminhos não coincidem");
+        }
+        String refactoredPath =  path.substring(prefix.length());
+        if (refactoredPath.isBlank()){
+            throw new IllegalArgumentException("Caminho vazio");
+        }
+        return refactoredPath;
     }
 }

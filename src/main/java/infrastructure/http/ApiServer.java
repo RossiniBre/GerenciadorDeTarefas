@@ -1,11 +1,16 @@
 package infrastructure.http;
 
 import application.CreateTaskUseCase;
+import application.DeleteTaskUseCase;
 import application.ListTasksUseCase;
+import application.UpdateTaskDetailsUseCase;
 import com.sun.net.httpserver.HttpServer;
+import domain.TaskRepository;
 import domain.UserRepository;
 import infrastructure.http.actions.CreateTaskAction;
+import infrastructure.http.actions.DeleteTaskAction;
 import infrastructure.http.actions.ListTasksAction;
+import infrastructure.http.actions.UpdateTaskAction;
 import infrastructure.http.json.GsonJsonMapper;
 import infrastructure.http.json.JsonMapper;
 
@@ -16,11 +21,14 @@ public class ApiServer {
     private final CreateTaskUseCase createTaskUseCase;
     private final ListTasksUseCase listTasksUseCase;
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
 
-    public ApiServer(CreateTaskUseCase createTaskUseCase, ListTasksUseCase listTasksUseCase, UserRepository userRepository) {
+    public ApiServer(CreateTaskUseCase createTaskUseCase, ListTasksUseCase listTasksUseCase,
+                     UserRepository userRepository, TaskRepository taskRepository) {
         this.createTaskUseCase = createTaskUseCase;
         this.listTasksUseCase = listTasksUseCase;
         this.userRepository = userRepository;
+        this.taskRepository = taskRepository;
     }
 
     public void start(int port) throws IOException {
@@ -31,7 +39,11 @@ public class ApiServer {
         // 3
         CreateTaskAction createAction = new CreateTaskAction(createTaskUseCase, jsonMapper, userRepository);
         ListTasksAction listAction = new ListTasksAction(listTasksUseCase, jsonMapper, userRepository);
-        server.createContext("/tasks", new TasksHandler(createAction, listAction));
+        UpdateTaskDetailsUseCase updateTaskUseCase = new UpdateTaskDetailsUseCase(taskRepository);
+        UpdateTaskAction updateAction = new UpdateTaskAction(updateTaskUseCase, jsonMapper, userRepository);
+        DeleteTaskUseCase deleteTaskUseCase = new DeleteTaskUseCase(taskRepository);
+        DeleteTaskAction deleteAction = new DeleteTaskAction(deleteTaskUseCase, userRepository);
+        server.createContext("/tasks", new TasksHandler(createAction, listAction, updateAction, deleteAction));
         // 4
         server.setExecutor(null);
         // 5

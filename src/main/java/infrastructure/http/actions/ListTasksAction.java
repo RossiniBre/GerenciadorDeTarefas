@@ -8,8 +8,8 @@ import domain.exceptions.DomainException;
 import domain.exceptions.InvalidCredentialsException;
 import infrastructure.http.json.HttpJson;
 import infrastructure.http.json.JsonMapper;
-import infrastructure.http.dto.CreateTaskResponse;
-
+import infrastructure.http.dto.ListTasksRequest;
+import infrastructure.http.dto.ListTasksResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -30,28 +30,26 @@ public class ListTasksAction implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         try {
             Map<String, String> params = HttpJson.parseQuery(exchange.getRequestURI().getQuery());
+            ListTasksRequest request = ListTasksRequest.fromQuery(params);
 
-            String username = params.get("username");
-            if (username == null || username.isBlank()) {
+            if (request.username == null || request.username.isBlank()) {
                 HttpJson.sendResponse(exchange, 400, "{\"error\":\"Parâmetro 'username' é obrigatório (auth temporária)\"}");
                 return;
             }
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(InvalidCredentialsException::new);
+            User user = userRepository.findByUsername(request.username).orElseThrow(InvalidCredentialsException::new);
 
-            TaskStatus status = params.containsKey("status") ? TaskStatus.valueOf(params.get("status")) : null;
-            TaskPriority priority = params.containsKey("priority") ? TaskPriority.valueOf(params.get("priority")) : null;
-            TaskCategory category = params.containsKey("category") ? TaskCategory.valueOf(params.get("category")) : null;
+            TaskStatus status = request.status != null ? TaskStatus.valueOf(request.status) : null;
+            TaskPriority priority = request.priority != null ? TaskPriority.valueOf(request.priority) : null;
+            TaskCategory category = request.category != null ? TaskCategory.valueOf(request.category) : null;
 
-            ListTasksUseCase.TaskFilter filter = (status == null && priority == null && category == null)
-                    ? null
-                    : new ListTasksUseCase.TaskFilter(status, priority, category);
+            ListTasksUseCase.TaskFilter filter = (status == null && priority == null && category == null) ? null : new ListTasksUseCase.TaskFilter(status, priority, category);
 
             List<Task> tasks = listTasksUseCase.execute(user.getId(), filter);
 
-            List<CreateTaskResponse> response = tasks.stream()
-                    .map(t -> new CreateTaskResponse(t.getId(), t.getTitle(), t.getStatus().name(), t.getPriority().name(), t.getCategory().name()))
-                    .toList();
+            List<ListTasksResponse.TaskItem> items = tasks.stream()
+                    .map(t -> new ListTasksResponse.TaskItem(t.getId(), t.getTitle(), t.getStatus().name(), t.getPriority().name(), t.getCategory().name())).toList();
+
+            ListTasksResponse response = new ListTasksResponse(items);
 
             HttpJson.sendResponse(exchange, 200, jsonMapper.toJson(response));
 

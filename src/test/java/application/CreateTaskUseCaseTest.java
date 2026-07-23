@@ -16,7 +16,7 @@ class CreateTaskUseCaseTest {
         CreateTaskUseCase useCase = new CreateTaskUseCase(repo);
         // Act
         User owner = User.newUser("owner-123", "hash-fake-123");
-        Task task = useCase.execute("Titulo original", "Descricao original", owner);
+        Task task = useCase.execute("Titulo original", "Descricao original", owner, null, null);
 
         // Assert
         assertEquals("Titulo original", task.getTitle());

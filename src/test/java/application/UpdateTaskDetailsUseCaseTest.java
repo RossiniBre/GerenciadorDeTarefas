@@ -18,11 +18,11 @@ class UpdateTaskDetailsUseCaseTest {
         UpdateTaskDetailsUseCase useCase = new UpdateTaskDetailsUseCase(repo);
 
         // Act
-        Task updatedTask = useCase.execute("Novo Titulo", "Nova Descricao", existingId, "owner-123");
+        Task updatedTask = useCase.execute("Novo Titulo", "Nova Descricao", null, null, existingId, "owner-123");
 
         // Assert
-       assertEquals("Novo Titulo", updatedTask.getTitle());
-       assertEquals("Nova Descricao", updatedTask.getDescription());
-       assertEquals(existingTask.getId(), updatedTask.getId());
+        assertEquals("Novo Titulo", updatedTask.getTitle());
+        assertEquals("Nova Descricao", updatedTask.getDescription());
+        assertEquals(existingTask.getId(), updatedTask.getId());
     }
 }

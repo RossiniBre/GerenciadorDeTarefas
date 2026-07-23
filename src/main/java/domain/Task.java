@@ -64,11 +64,14 @@ public class Task {
         this.status = TaskStatus.COMPLETED;
     }
 
-    public void updateDetails(String title, String description){
-        if (title == null || title.isBlank()){
-            throw new InvalidFieldException("Título é obrigatório!");
+    public void updateTitle(String title) {
+        if (title == null || title.isBlank()) {
+            throw new InvalidFieldException("title");
         }
         this.title = title;
+    }
+
+    public void updateDescription(String description) {
         this.description = description;
     }
 

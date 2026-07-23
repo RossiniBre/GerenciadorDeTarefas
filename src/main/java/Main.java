@@ -94,7 +94,7 @@ public class Main {
                 new ListTasksUseCase.TaskFilter(TaskStatus.COMPLETED, TaskPriority.HIGH, TaskCategory.WORK)));
 
         // connection.close();
-        ApiServer apiServer = new ApiServer(createTaskUseCase, listTasksUseCase, userRepository);
+        ApiServer apiServer = new ApiServer(createTaskUseCase, listTasksUseCase, userRepository, taskRepository);
         apiServer.start(8080);
     }
 
