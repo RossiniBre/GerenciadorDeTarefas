@@ -28,6 +28,16 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
+    public Optional<User> findById(String id) {
+        for (User user : userList) {
+            if (user.getId().equals(id)) {
+                return Optional.of(user);
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public void deleteAccount(String id){
         userList.removeIf(user -> user.getId().equals(id));
     }

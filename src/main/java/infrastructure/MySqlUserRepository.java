@@ -61,6 +61,28 @@ public class MySqlUserRepository implements UserRepository {
     }
 
     @Override
+    public Optional<User> findById(String id) {
+        String sql = "SELECT * FROM users WHERE id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String username = rs.getString("username");
+                    String passwordHash = rs.getString("password_hash");
+                    User user = User.rebuiltedUser(id, username, passwordHash);
+                    return Optional.of(user);
+                } else {
+                    return Optional.empty();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RepositoryException("Erro ao buscar usuário por id", e);
+        }
+    }
+
+    @Override
     public void deleteAccount(String id) {
         String sql = "DELETE FROM users WHERE id = ?";
 

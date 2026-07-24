@@ -1,24 +1,17 @@
 package infrastructure.http.dto;
 
+import java.util.Map;
+
 public class ListTasksRequest {
-    public String username;
     public String status;
     public String priority;
     public String category;
 
-    public ListTasksRequest(String username, String status, String priority, String category) {
-        this.username = username;
-        this.status = status;
-        this.priority = priority;
-        this.category = category;
-    }
-
-    public static ListTasksRequest fromQuery(java.util.Map<String, String> params) {
-        return new ListTasksRequest(
-                params.get("username"),
-                params.get("status"),
-                params.get("priority"),
-                params.get("category")
-        );
+    public static ListTasksRequest fromQuery(Map<String, String> params) {
+        ListTasksRequest request = new ListTasksRequest();
+        request.status = params.get("status");
+        request.priority = params.get("priority");
+        request.category = params.get("category");
+        return request;
     }
 }

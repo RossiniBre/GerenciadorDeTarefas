@@ -5,7 +5,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import domain.*;
 import domain.exceptions.DomainException;
-import domain.exceptions.InvalidCredentialsException;
+import domain.exceptions.UnauthorizedTaskAccessException;
+import infrastructure.http.AuthContext;
 import infrastructure.http.json.HttpJson;
 import infrastructure.http.json.JsonMapper;
 import infrastructure.http.dto.UpdateTaskRequest;
@@ -18,21 +19,24 @@ public class UpdateTaskAction implements HttpHandler {
     private final UpdateTaskDetailsUseCase updateTaskUseCase;
     private final JsonMapper jsonMapper;
     private final UserRepository userRepository;
+    private final SessionRepository sessionRepository;
 
-    public UpdateTaskAction(UpdateTaskDetailsUseCase updateTaskUseCase, JsonMapper jsonMapper, UserRepository userRepository) {
+    public UpdateTaskAction(UpdateTaskDetailsUseCase updateTaskUseCase, JsonMapper jsonMapper,
+                            UserRepository userRepository, SessionRepository sessionRepository) {
         this.updateTaskUseCase = updateTaskUseCase;
         this.jsonMapper = jsonMapper;
         this.userRepository = userRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
+            User user = AuthContext.requireUser(exchange, sessionRepository, userRepository);
+
             String id = HttpJson.extractedId(exchange.getRequestURI().getPath(), "/tasks/");
             String body = HttpJson.readBody(exchange.getRequestBody());
             UpdateTaskRequest request = jsonMapper.fromJson(body, UpdateTaskRequest.class);
-
-            User user = userRepository.findByUsername(request.username).orElseThrow(InvalidCredentialsException::new);
 
             TaskPriority priority = request.priority != null ? TaskPriority.valueOf(request.priority) : null;
             TaskCategory category = request.category != null ? TaskCategory.valueOf(request.category) : null;
@@ -42,6 +46,10 @@ public class UpdateTaskAction implements HttpHandler {
             var response = new UpdateTaskResponse(task.getId(), task.getTitle(), task.getStatus().name(), task.getPriority().name(), task.getCategory().name());
             HttpJson.sendResponse(exchange, 200, jsonMapper.toJson(response));
 
+        } catch (domain.exceptions.InvalidCredentialsException e) {
+            HttpJson.sendResponse(exchange, 401, "{\"error\":\"" + e.getMessage() + "\"}");
+        } catch (UnauthorizedTaskAccessException e) {
+            HttpJson.sendResponse(exchange, 403, "{\"error\":\"" + e.getMessage() + "\"}");
         } catch (IllegalArgumentException e) {
             HttpJson.sendResponse(exchange, 400, "{\"error\":\"Valor inválido: " + e.getMessage() + "\"}");
         } catch (DomainException e) {

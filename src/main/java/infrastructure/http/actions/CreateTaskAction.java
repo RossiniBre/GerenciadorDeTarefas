@@ -5,7 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import domain.*;
 import domain.exceptions.DomainException;
-import domain.exceptions.InvalidCredentialsException;
+import infrastructure.http.AuthContext;
 import infrastructure.http.json.HttpJson;
 import infrastructure.http.json.JsonMapper;
 import infrastructure.http.dto.CreateTaskRequest;
@@ -18,23 +18,26 @@ public class CreateTaskAction implements HttpHandler {
     private final CreateTaskUseCase createTaskUseCase;
     private final JsonMapper jsonMapper;
     private final UserRepository userRepository;
+    private final SessionRepository sessionRepository;
 
-    public CreateTaskAction(CreateTaskUseCase createTaskUseCase, JsonMapper jsonMapper, UserRepository userRepository) {
+    public CreateTaskAction(CreateTaskUseCase createTaskUseCase, JsonMapper jsonMapper,
+                            UserRepository userRepository, SessionRepository sessionRepository) {
         this.createTaskUseCase = createTaskUseCase;
         this.jsonMapper = jsonMapper;
         this.userRepository = userRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
+            User user = AuthContext.requireUser(exchange, sessionRepository, userRepository);
+
             String body = HttpJson.readBody(exchange.getRequestBody());
             CreateTaskRequest request = jsonMapper.fromJson(body, CreateTaskRequest.class);
 
             TaskPriority priority = request.priority != null ? TaskPriority.valueOf(request.priority) : null;
             TaskCategory category = request.category != null ? TaskCategory.valueOf(request.category) : null;
-
-            User user = userRepository.findByUsername(request.username).orElseThrow(InvalidCredentialsException::new);
 
             Task task = createTaskUseCase.execute(request.title, request.description, user, priority, category);
 
