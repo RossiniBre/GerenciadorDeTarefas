@@ -51,6 +51,8 @@ public class ListTasksAction implements HttpHandler {
                     .map(t -> new ListTasksResponse.TaskItem(t.getId(), t.getTitle(), t.getStatus().name(), t.getPriority().name(), t.getCategory().name()))
                     .toList();
 
+            HttpJson.sendResponse(exchange, 200, jsonMapper.toJson(items));
+
             HttpJson.sendResponse(exchange, 200, jsonMapper.toJson(new ListTasksResponse(items)));
 
         } catch (domain.exceptions.InvalidCredentialsException e) {

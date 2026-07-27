@@ -44,6 +44,8 @@ public class CreateTaskAction implements HttpHandler {
             var response = new CreateTaskResponse(task.getId(), task.getTitle(), task.getStatus().name(), task.getPriority().name(), task.getCategory().name());
             HttpJson.sendResponse(exchange, 201, jsonMapper.toJson(response));
 
+        } catch (domain.exceptions.InvalidCredentialsException e) {
+            HttpJson.sendResponse(exchange, 401, "{\"error\":\"" + e.getMessage() + "\"}");
         } catch (IllegalArgumentException e) {
             HttpJson.sendResponse(exchange, 400, "{\"error\":\"Valor inválido: " + e.getMessage() + "\"}");
         } catch (DomainException e) {
