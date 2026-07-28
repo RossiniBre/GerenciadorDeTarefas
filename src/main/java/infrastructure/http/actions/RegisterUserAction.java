@@ -3,7 +3,7 @@ package infrastructure.http.actions;
 import application.RegisterUserUseCase;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import domain.User;
+import domain.model.User;
 import domain.exceptions.DomainException;
 import domain.exceptions.DuplicateUsernameException;
 import infrastructure.http.json.HttpJson;

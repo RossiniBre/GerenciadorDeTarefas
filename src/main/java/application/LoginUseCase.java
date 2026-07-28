@@ -1,9 +1,9 @@
 package application;
 
-import domain.CredentialsValidator;
-import domain.PasswordHasher;
-import domain.User;
-import domain.UserRepository;
+import domain.security.CredentialsValidator;
+import domain.security.PasswordHasher;
+import domain.model.User;
+import domain.repositories.UserRepository;
 import domain.exceptions.InvalidCredentialsException;
 import java.util.Optional;
 

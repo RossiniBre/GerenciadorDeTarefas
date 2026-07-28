@@ -1,9 +1,9 @@
 package application;
 
-import domain.Task;
-import domain.TaskCategory;
-import domain.TaskPriority;
-import domain.TaskRepository;
+import domain.model.Task;
+import domain.model.TaskCategory;
+import domain.model.TaskPriority;
+import domain.repositories.TaskRepository;
 import domain.exceptions.TaskNotFoundException;
 
 public class UpdateTaskDetailsUseCase {

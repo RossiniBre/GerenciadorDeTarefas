@@ -1,4 +1,4 @@
-package domain;
+package domain.model;
 
 public class TaskBuilder {
     private final String ownerId;

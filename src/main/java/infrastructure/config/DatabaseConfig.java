@@ -1,4 +1,4 @@
-package infrastructure;
+package infrastructure.config;
 
 import domain.exceptions.InvalidFieldException;
 

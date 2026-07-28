@@ -1,7 +1,7 @@
-package infrastructure;
+package infrastructure.persistence;
 
-import domain.TaskRepository;
-import domain.Task;
+import domain.repositories.TaskRepository;
+import domain.model.Task;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;

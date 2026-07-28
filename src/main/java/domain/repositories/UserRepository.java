@@ -1,4 +1,6 @@
-package domain;
+package domain.repositories;
+
+import domain.model.User;
 
 import java.util.Optional;
 

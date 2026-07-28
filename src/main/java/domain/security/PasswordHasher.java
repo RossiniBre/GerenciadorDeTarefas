@@ -1,4 +1,4 @@
-package domain;
+package domain.security;
 
 public interface PasswordHasher {
     String hash(String rawPassword);

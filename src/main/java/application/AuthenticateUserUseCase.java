@@ -1,9 +1,9 @@
 package application;
 
-import domain.LoginRateLimiter;
-import domain.SessionRepository;
-import domain.TokenGenerator;
-import domain.User;
+import domain.security.LoginRateLimiter;
+import domain.repositories.SessionRepository;
+import domain.security.TokenGenerator;
+import domain.model.User;
 import domain.exceptions.InvalidCredentialsException;
 import domain.exceptions.TooManyAttemptsException;
 

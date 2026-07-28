@@ -1,6 +1,6 @@
-package infrastructure;
+package infrastructure.persistence;
 
-import domain.LoginRateLimiter;
+import domain.security.LoginRateLimiter;
 
 import java.time.Duration;
 import java.time.Instant;

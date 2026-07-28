@@ -1,5 +1,6 @@
 package domain;
 
+import domain.model.*;
 import domain.exceptions.InvalidFieldException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

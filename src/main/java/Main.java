@@ -1,8 +1,8 @@
-import domain.TaskRepository;
-import domain.UserRepository;
-import infrastructure.DatabaseConfig;
-import infrastructure.MySqlTaskRepository;
-import infrastructure.MySqlUserRepository;
+import domain.repositories.TaskRepository;
+import domain.repositories.UserRepository;
+import infrastructure.config.DatabaseConfig;
+import infrastructure.persistence.mysql.MySqlTaskRepository;
+import infrastructure.persistence.mysql.MySqlUserRepository;
 import infrastructure.http.ApiServer;
 import application.CreateTaskUseCase;
 import application.ListTasksUseCase;

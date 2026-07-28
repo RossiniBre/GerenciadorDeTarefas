@@ -1,7 +1,7 @@
 package application;
 
-import domain.Task;
-import domain.TaskRepository;
+import domain.model.Task;
+import domain.repositories.TaskRepository;
 import domain.exceptions.TaskNotFoundException;
 
 public class StartTaskUseCase {

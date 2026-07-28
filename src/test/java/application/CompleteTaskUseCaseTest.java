@@ -1,8 +1,8 @@
 package application;
 
-import domain.Task;
-import domain.TaskStatus;
-import infrastructure.InMemoryTaskRepository;
+import domain.model.Task;
+import domain.model.TaskStatus;
+import infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

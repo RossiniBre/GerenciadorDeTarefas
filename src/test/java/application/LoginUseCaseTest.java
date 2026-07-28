@@ -1,11 +1,11 @@
 package application;
 
-import domain.PasswordHasher;
-import domain.User;
-import domain.UserRepository;
+import domain.security.PasswordHasher;
+import domain.model.User;
+import domain.repositories.UserRepository;
 import domain.exceptions.InvalidCredentialsException;
-import infrastructure.InMemoryUserRepository;
-import infrastructure.Pbkdf2PasswordHasher;
+import infrastructure.persistence.InMemoryUserRepository;
+import infrastructure.security.Pbkdf2PasswordHasher;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

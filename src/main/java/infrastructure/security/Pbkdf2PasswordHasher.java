@@ -1,6 +1,6 @@
-package infrastructure;
+package infrastructure.security;
 
-import domain.PasswordHasher;
+import domain.security.PasswordHasher;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;

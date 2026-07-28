@@ -1,4 +1,4 @@
-package domain;
+package domain.repositories;
 
 import java.time.Instant;
 import java.util.Optional;

@@ -1,6 +1,6 @@
-package infrastructure;
+package infrastructure.security;
 
-import domain.TokenGenerator;
+import domain.security.TokenGenerator;
 import java.util.UUID;
 
 public class UuidTokenGenerator implements TokenGenerator {

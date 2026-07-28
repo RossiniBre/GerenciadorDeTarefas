@@ -2,7 +2,7 @@ package infrastructure.http.actions;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import domain.SessionRepository;
+import domain.repositories.SessionRepository;
 import infrastructure.http.json.HttpJson;
 
 import java.io.IOException;

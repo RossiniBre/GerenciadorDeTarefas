@@ -1,9 +1,9 @@
 package infrastructure.http;
 
 import com.sun.net.httpserver.HttpExchange;
-import domain.SessionRepository;
-import domain.User;
-import domain.UserRepository;
+import domain.repositories.SessionRepository;
+import domain.model.User;
+import domain.repositories.UserRepository;
 import domain.exceptions.InvalidCredentialsException;
 
 public final class AuthContext {

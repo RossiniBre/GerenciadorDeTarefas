@@ -1,7 +1,8 @@
-package infrastructure;
+package infrastructure.persistence.mysql;
 
-import domain.User;
-import domain.UserRepository;
+import domain.model.User;
+import domain.repositories.UserRepository;
+import infrastructure.config.RepositoryException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

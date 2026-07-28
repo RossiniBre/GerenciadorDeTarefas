@@ -1,6 +1,6 @@
-package infrastructure;
+package infrastructure.persistence;
 
-import domain.SessionRepository;
+import domain.repositories.SessionRepository;
 
 import java.time.Instant;
 import java.util.Map;

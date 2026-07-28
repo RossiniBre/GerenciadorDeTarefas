@@ -1,7 +1,7 @@
-package infrastructure;
+package infrastructure.persistence;
 
-import domain.User;
-import domain.UserRepository;
+import domain.model.User;
+import domain.repositories.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

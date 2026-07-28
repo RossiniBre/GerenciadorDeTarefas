@@ -119,15 +119,12 @@ Security improvements:
 
 Database integration implemented using JDBC:
 
-* MySQL 8 running through Docker
-* JDBC repositories
-* `DatabaseConfig`
+* JDBC persistence layer
+* MySQL repositories
+* Database configuration
 * Environment-based configuration
-* Repository persistence abstraction
-* `ON DUPLICATE KEY UPDATE` support
-* UNIQUE constraint for usernames
-* Secure password validation
-* PBKDF2 password hashing
+* Transaction handling
+* Database constraints
 
 ---
 
@@ -229,6 +226,61 @@ This allows:
 
 This behavior is intentional and simulates independent user registrations.
 
+# Phase 6 — AI-assisted task creation
+
+## Assistant workflow foundation
+
+The project started introducing an AI-assisted workflow for creating tasks through natural language.
+
+The objective is to allow users to describe tasks conversationally while maintaining the same architectural principles used throughout the project: separation of responsibilities, domain isolation, and controlled data flow.
+
+Implemented so far:
+
+* Assistant workflow foundation
+* User intent classification before task generation
+* Structured assistant response flow
+* Validation pipeline before task creation
+* Task suggestion generation contract
+
+---
+
+## Assistant response handling
+
+The assistant communication was designed with explicit response states instead of generic responses.
+
+Every interaction is classified into one of three possible scenarios:
+
+* Valid suggestions — when the user's request contains enough information to generate task suggestions
+* Missing information — when the request is related to task creation but additional details are required
+* Out of scope — when the message does not belong to the task management context
+
+This approach prevents uncontrolled assistant behavior and keeps the interaction predictable for the application layer.
+
+---
+
+## Validation pipeline
+
+Before a task can be created, the assistant workflow performs multiple verification steps.
+
+The assistant does not directly create tasks or bypass domain rules.
+
+After generating a valid suggestion, the existing application flow is reused.
+
+This keeps task ownership, validations, and persistence responsibilities inside the existing backend architecture.
+
+---
+# Engineering Principles
+
+Throughout the project, every feature follows these principles:
+
+* Business rules remain inside the domain layer
+* External technologies depend on application contracts
+* Use cases coordinate application behavior
+* Infrastructure details can be replaced without changing business logic
+* Tests validate behavior instead of implementation details
+
+---
+
 # Architecture
 
 ---
@@ -238,14 +290,15 @@ src/main/java
 ├── domain
 │   ├── model
 │   ├── repository
-│   ├── services
-│   └── exceptions
+│   ├── assistant
+│   ├── exceptions
+│   └── security
 │
 ├── application
 │   └── usecases
 │
 ├── infrastructure
-│
+│   │
 │   ├── http
 │   │   ├── dto
 │   │   ├── ApiServer
@@ -256,14 +309,15 @@ src/main/java
 │   │   ├── GsonJsonMapper
 │   │   └── HttpJson
 │   │
-│   ├── database
-│   │   ├── DatabaseConfig
-│   │   ├── MySqlTaskRepository
-│   │   └── MySqlUserRepository
-│   │
+│   ├── config
+│   │   └── DatabaseConfig
+│   │   
 │   ├── security
-│   │   └── Pbkdf2PasswordHasher
-│
+│   │   ├── Pbkdf2PasswordHasher
+│   │   └── UuidTokenGenerator
+│   │   
+│   └── persistence
+│   
 └── Main
 ```
 Dependency direction:
@@ -308,7 +362,7 @@ The domain layer has no dependency on:
 | 3     | Done    | Categories, priorities, Builder      |
 | 4     | Done    | Users, authentication, authorization |
 | 5     | Done    | MySQL, REST API, HTTP adapters       |
-| 6     | In-Progress | AI-assisted task creation        |
+| 6 | In Progress | AI assistant foundation and task generation workflow |
 | 7     | | Notifications                                |
 | 8     | | Migration to Spring Boot                     |
 ----------------------------------------------------------

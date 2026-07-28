@@ -1,6 +1,12 @@
-package infrastructure;
+package infrastructure.persistence.mysql;
 
-import domain.*;
+import domain.model.Task;
+import domain.model.TaskCategory;
+import domain.model.TaskPriority;
+import domain.model.TaskStatus;
+import domain.repositories.TaskRepository;
+import infrastructure.config.RepositoryException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

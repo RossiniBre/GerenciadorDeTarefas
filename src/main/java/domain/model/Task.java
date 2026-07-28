@@ -1,4 +1,4 @@
-package domain;
+package domain.model;
 
 import domain.exceptions.InvalidFieldException;
 import domain.exceptions.InvalidTaskStateException;

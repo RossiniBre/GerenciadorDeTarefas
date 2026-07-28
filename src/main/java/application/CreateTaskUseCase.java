@@ -1,9 +1,9 @@
 package application;
-import domain.Task;
-import domain.TaskRepository;
-import domain.User;
-import domain.TaskPriority;
-import domain.TaskCategory;
+import domain.model.Task;
+import domain.repositories.TaskRepository;
+import domain.model.User;
+import domain.model.TaskPriority;
+import domain.model.TaskCategory;
 
 public class CreateTaskUseCase {
     private final TaskRepository repo;
