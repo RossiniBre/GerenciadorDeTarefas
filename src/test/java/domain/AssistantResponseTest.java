@@ -6,61 +6,93 @@ import domain.model.TaskPriority;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class AssistantResponseTest {
 
     @Test
-    void deveCriarValidSuggestionsComListaDeSugestoes() {
-        TaskSuggestion suggestion = new TaskSuggestion(
-                "Estudar Java",
-                "Revisar sealed interfaces",
-                TaskCategory.STUDY,
-                TaskPriority.MEDIUM
+    void shouldCreateValidSuggestionsWithSuggestionList() {
+        TaskSuggestion suggestion = new TaskSuggestion.Create(
+                UUID.randomUUID(),
+                "Study Java",
+                "Review sealed interfaces",
+                TaskPriority.MEDIUM,
+                TaskCategory.STUDY
         );
 
-        AssistantResponse response = new AssistantResponse.ValidSuggestions(List.of(suggestion));
+        AssistantResponse response = new AssistantResponse.ValidSuggestions(
+                List.of(suggestion)
+        );
 
         assertTrue(response instanceof AssistantResponse.ValidSuggestions);
     }
 
     @Test
-    void deveCriarOutOfScopeComMotivo() {
-        AssistantResponse response = new AssistantResponse.OutOfScope("Isso não é sobre criar tarefas.");
+    void shouldCreateOutOfScopeWithReason() {
+        AssistantResponse response = new AssistantResponse.OutOfScope(
+                "This is not about creating tasks."
+        );
 
         assertTrue(response instanceof AssistantResponse.OutOfScope);
     }
 
     @Test
-    void deveCriarMissingInfosComPergunta() {
-        AssistantResponse response = new AssistantResponse.MissingInfos("Qual o título da tarefa?");
+    void shouldCreateMissingInfosWithQuestion() {
+        AssistantResponse response = new AssistantResponse.MissingInfos(
+                "What is the task title?"
+        );
 
         assertTrue(response instanceof AssistantResponse.MissingInfos);
     }
 
     @Test
-    void switchExaustivoDeveTratarAsTresVariantes() {
-        AssistantResponse response = new AssistantResponse.OutOfScope("Fora de escopo.");
+    void shouldHandleAllAssistantResponseVariants() {
+        AssistantResponse response = new AssistantResponse.InformationalAnswer(
+                "Java uses object-oriented programming."
+        );
 
-        String resultado = switch (response) {
-            case AssistantResponse.ValidSuggestions vs -> "sugestões: " + vs.suggestions().size();
-            case AssistantResponse.OutOfScope oos -> "recusado: " + oos.reason();
-            case AssistantResponse.MissingInfos mi -> "pergunta: " + mi.question();
+        String result = switch (response) {
+            case AssistantResponse.ValidSuggestions vs ->
+                    "suggestions: " + vs.suggestions().size();
+
+            case AssistantResponse.OutOfScope oos ->
+                    "rejected: " + oos.reason();
+
+            case AssistantResponse.MissingInfos mi ->
+                    "question: " + mi.question();
+
+            case AssistantResponse.InformationalAnswer ia ->
+                    "answer: " + ia.answer();
         };
 
-        assertEquals("recusado: Fora de escopo.", resultado);
+        assertEquals(
+                "answer: Java uses object-oriented programming.",
+                result
+        );
     }
 
     @Test
-    void assistantDeveSerImplementavelComoStrategy() {
-        TaskCreationAssistant fakeAssistant = messages ->
-                new AssistantResponse.MissingInfos("Qual o título?");
+    void shouldAllowTaskAssistantStrategyImplementation() {
+        TaskAssistant fakeAssistant = (conversationHistory, requesterId) ->
+                new AssistantResponse.MissingInfos(
+                        "What is the task title?"
+                );
 
-        Message userMessage = new Message(MessageAuthor.USER, "cria uma tarefa");
+        Message userMessage = new Message(
+                MessageAuthor.USER,
+                "create a task"
+        );
 
-        AssistantResponse response = fakeAssistant.process(List.of(userMessage));
+        AssistantResponse response = fakeAssistant.process(
+                List.of(userMessage),
+                UUID.randomUUID().toString()
+        );
 
-        assertInstanceOf(AssistantResponse.MissingInfos.class, response);
+        assertInstanceOf(
+                AssistantResponse.MissingInfos.class,
+                response
+        );
     }
 }

@@ -1,4 +1,4 @@
-package application;
+package application.usecases;
 
 import domain.model.Task;
 import domain.model.TaskCategory;

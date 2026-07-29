@@ -23,7 +23,7 @@ public class User {
         return new User(UUID.randomUUID().toString(), username, passwordHash);
     }
 
-    public static User rebuiltedUser(String id, String username, String passwordHash){
+    public static User rebuiltUser(String id, String username, String passwordHash){
         return new User(id, username, passwordHash);
     }
 

@@ -1,6 +1,6 @@
 package infrastructure.http.actions;
 
-import application.CreateTaskUseCase;
+import application.usecases.CreateTaskUseCase;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import domain.model.Task;

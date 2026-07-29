@@ -258,6 +258,37 @@ This approach prevents uncontrolled assistant behavior and keeps the interaction
 
 ---
 
+## Assistant task operations
+
+The assistant workflow was expanded from suggestion generation into a complete task management flow.
+
+Implemented capabilities:
+
+* Natural language task creation
+* Task update through conversational requests
+* Task deletion through assistant commands
+* Task start and completion actions
+* Task listing based on user requests
+* Confirmation and rejection flow for generated suggestions
+
+The assistant does not directly modify tasks.
+
+---
+
+## Assistant conversation memory
+
+Conversation context was added using token-based sessions.
+
+Implemented:
+
+* `AssistantSession`
+* `AssistantSessionRepository`
+* Redis-based session persistence
+* Docker Redis container integration
+* In-memory session implementation for testing
+
+---
+
 ## Validation pipeline
 
 Before a task can be created, the assistant workflow performs multiple verification steps.
@@ -362,7 +393,7 @@ The domain layer has no dependency on:
 | 3     | Done    | Categories, priorities, Builder      |
 | 4     | Done    | Users, authentication, authorization |
 | 5     | Done    | MySQL, REST API, HTTP adapters       |
-| 6 | In Progress | AI assistant foundation and task generation workflow |
+| 6 | In Progress | AI assistant workflow, conversational memory and task operations |
 | 7     | | Notifications                                |
 | 8     | | Migration to Spring Boot                     |
 ----------------------------------------------------------
@@ -380,6 +411,7 @@ The domain layer has no dependency on:
 * Docker
 * WSL2
 * Postman
+* Redis
 
 ---
 

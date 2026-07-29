@@ -1,6 +1,6 @@
 package infrastructure.http;
 
-import application.*;
+import application.usecases.*;
 import com.sun.net.httpserver.HttpServer;
 import domain.repositories.SessionRepository;
 import domain.repositories.TaskRepository;

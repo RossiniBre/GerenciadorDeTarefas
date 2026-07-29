@@ -1,4 +1,5 @@
-package application;
+package application.usecases;
+
 import domain.model.Task;
 import domain.repositories.TaskRepository;
 import domain.model.User;

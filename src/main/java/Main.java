@@ -4,8 +4,8 @@ import infrastructure.config.DatabaseConfig;
 import infrastructure.persistence.mysql.MySqlTaskRepository;
 import infrastructure.persistence.mysql.MySqlUserRepository;
 import infrastructure.http.ApiServer;
-import application.CreateTaskUseCase;
-import application.ListTasksUseCase;
+import application.usecases.CreateTaskUseCase;
+import application.usecases.ListTasksUseCase;
 
 import java.io.IOException;
 import java.sql.Connection;

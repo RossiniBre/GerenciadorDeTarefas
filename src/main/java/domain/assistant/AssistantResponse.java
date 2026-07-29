@@ -12,4 +12,7 @@ public sealed interface AssistantResponse {
 
     record MissingInfos(String question)
             implements AssistantResponse {}
+
+    record InformationalAnswer(String answer)
+            implements AssistantResponse {}
 }

@@ -1,6 +1,6 @@
 package infrastructure.http.actions;
 
-import application.DeleteTaskUseCase;
+import application.usecases.DeleteTaskUseCase;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import domain.repositories.SessionRepository;

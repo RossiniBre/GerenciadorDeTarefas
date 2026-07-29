@@ -1,12 +1,48 @@
 package domain.assistant;
 
-import domain.model.TaskCategory;
 import domain.model.TaskPriority;
+import domain.model.TaskCategory;
 
-public record TaskSuggestion(
-        String title,
-        String description,
-        TaskCategory category,
-        TaskPriority priority
-) {
+import java.util.UUID;
+
+public sealed interface TaskSuggestion permits
+        TaskSuggestion.Create,
+        TaskSuggestion.Update,
+        TaskSuggestion.Delete,
+        TaskSuggestion.Start,
+        TaskSuggestion.Complete {
+
+    UUID id();
+
+    record Create(
+            UUID id,
+            String title,
+            String description,
+            TaskPriority priority,
+            TaskCategory category
+    ) implements TaskSuggestion {}
+
+    record Update(
+            UUID id,
+            String targetTaskId,
+            String title,
+            String description,
+            TaskPriority priority,
+            TaskCategory category
+    ) implements TaskSuggestion {}
+
+    record Delete(
+            UUID id,
+            String targetTaskId
+    ) implements TaskSuggestion {}
+
+    record Start(
+            UUID id,
+            String targetTaskId
+    ) implements TaskSuggestion {}
+
+    record Complete(
+            UUID id,
+            String targetTaskId
+    ) implements TaskSuggestion {}
 }

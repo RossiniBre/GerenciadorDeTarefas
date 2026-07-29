@@ -64,7 +64,7 @@ public class MySqlTaskRepository implements TaskRepository {
                     TaskStatus status = TaskStatus.valueOf(rs.getString("status"));
                     TaskPriority priority = TaskPriority.valueOf(rs.getString("priority"));
                     TaskCategory category = TaskCategory.valueOf(rs.getString("category"));
-                    Task task = Task.rebuiltedTask(title, description, status, textId, priority, category, textOwnerId);
+                    Task task = Task.rebuiltTask(title, description, status, textId, priority, category, textOwnerId);
                     allTasks.add(task);
                 }
                 return allTasks;
@@ -91,7 +91,7 @@ public class MySqlTaskRepository implements TaskRepository {
                     TaskStatus status = TaskStatus.valueOf(rs.getString("status"));
                     TaskPriority priority = TaskPriority.valueOf(rs.getString("priority"));
                     TaskCategory category = TaskCategory.valueOf(rs.getString("category"));
-                    Task task = Task.rebuiltedTask(title, description, status, textId, priority, category, ownerId);
+                    Task task = Task.rebuiltTask(title, description, status, textId, priority, category, ownerId);
                     return Optional.of(task);
                 } else {
                     return Optional.empty();

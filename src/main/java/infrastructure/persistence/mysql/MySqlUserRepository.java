@@ -50,7 +50,7 @@ public class MySqlUserRepository implements UserRepository {
                 if (rs.next()) {
                     String id = rs.getString("id");
                     String passwordHash = rs.getString("password_hash");
-                    User user = User.rebuiltedUser(id, username, passwordHash);
+                    User user = User.rebuiltUser(id, username, passwordHash);
                     return Optional.of(user);
                 } else {
                     return Optional.empty();
@@ -72,7 +72,7 @@ public class MySqlUserRepository implements UserRepository {
                 if (rs.next()) {
                     String username = rs.getString("username");
                     String passwordHash = rs.getString("password_hash");
-                    User user = User.rebuiltedUser(id, username, passwordHash);
+                    User user = User.rebuiltUser(id, username, passwordHash);
                     return Optional.of(user);
                 } else {
                     return Optional.empty();

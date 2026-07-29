@@ -1,9 +1,12 @@
 package application;
 
+import application.usecases.StartTaskUseCase;
 import domain.model.Task;
 import domain.model.TaskStatus;
+import domain.model.User;
 import infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class StartTaskUseCaseTest {
@@ -12,17 +15,28 @@ public class StartTaskUseCaseTest {
     void shouldStartPendingTask(){
         // Arrange
         InMemoryTaskRepository repo = new InMemoryTaskRepository();
-        Task existingTask = Task.newTask("Titulo original", "Descricao Original", "owner-123");
+
+        User user = User.newUser("owner123", "senhaHash");
+
+        Task existingTask = Task.newTask(
+                "Titulo original",
+                "Descricao Original",
+                user.getId()
+        );
+
         repo.save(existingTask);
+
         String existingId = existingTask.getId();
 
         // Act
-        StartTaskUseCase useCase= new StartTaskUseCase(repo);
-        useCase.execute(existingId, "owner-123");
+        StartTaskUseCase useCase = new StartTaskUseCase(repo);
+        useCase.execute(existingId, user);
 
         // Assert
-        TaskStatus status = repo.findById(existingId).orElseThrow().getStatus();
-        assertEquals(TaskStatus.IN_PROGRESS, status);
+        TaskStatus status = repo.findById(existingId)
+                .orElseThrow()
+                .getStatus();
 
+        assertEquals(TaskStatus.IN_PROGRESS, status);
     }
 }

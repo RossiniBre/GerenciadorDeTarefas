@@ -1,5 +1,6 @@
 package application;
 
+import application.usecases.RegisterUserUseCase;
 import domain.security.PasswordHasher;
 import domain.model.User;
 import domain.repositories.UserRepository;

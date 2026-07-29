@@ -35,7 +35,7 @@ public class Task {
         return new Task(title, description, TaskStatus.PENDING, UUID.randomUUID().toString(), TaskPriority.LOW, TaskCategory.UNCATEGORIZED, ownerId);
     }
 
-    public static Task rebuiltedTask(String title, String description, TaskStatus status, String id, TaskPriority priority, TaskCategory category, String ownerId){
+    public static Task rebuiltTask(String title, String description, TaskStatus status, String id, TaskPriority priority, TaskCategory category, String ownerId){
         return new Task(title, description, status, id, priority, category, ownerId);
     }
 

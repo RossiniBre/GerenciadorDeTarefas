@@ -1,18 +1,17 @@
-package application;
+package application.usecases;
 
 import domain.model.Task;
 import domain.repositories.TaskRepository;
 import domain.exceptions.TaskNotFoundException;
 
-public class StartTaskUseCase {
+public class DeleteTaskUseCase {
     private final TaskRepository repo;
 
-    public StartTaskUseCase(TaskRepository repo){ this.repo = repo; }
+    public DeleteTaskUseCase(TaskRepository repo){ this.repo = repo; }
 
     public void execute(String id, String requesterId) {
         Task task = repo.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
         task.verifyOwnership(requesterId);
-        task.startTask();
-        repo.save(task);
+        repo.removeTask(id);
     }
 }

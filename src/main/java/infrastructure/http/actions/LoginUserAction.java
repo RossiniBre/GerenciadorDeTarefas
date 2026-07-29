@@ -1,6 +1,6 @@
 package infrastructure.http.actions;
 
-import application.AuthenticateUserUseCase;
+import application.usecases.AuthenticateUserUseCase;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import domain.exceptions.DomainException;

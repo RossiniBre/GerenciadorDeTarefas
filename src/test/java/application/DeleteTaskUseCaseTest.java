@@ -1,5 +1,6 @@
 package application;
 
+import application.usecases.DeleteTaskUseCase;
 import domain.model.Task;
 import infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
