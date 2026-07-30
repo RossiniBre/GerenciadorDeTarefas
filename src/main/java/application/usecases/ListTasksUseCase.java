@@ -6,7 +6,9 @@ import domain.model.TaskPriority;
 import domain.repositories.TaskRepository;
 import domain.model.TaskStatus;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public class ListTasksUseCase {
 
@@ -30,26 +32,40 @@ public class ListTasksUseCase {
                 .filter(task -> appliedFilter.status() == null || task.getStatus() == appliedFilter.status())
                 .filter(task -> appliedFilter.priority() == null || task.getPriority() == appliedFilter.priority())
                 .filter(task -> appliedFilter.category() == null || task.getCategory() == appliedFilter.category())
+                .filter(task -> !appliedFilter.excludedStatuses().contains(task.getStatus()))
                 .sorted(Comparator.comparing(Task::getPriority).reversed())
                 .toList();
     }
 
-    public record TaskFilter(TaskStatus status, TaskPriority priority, TaskCategory category) {
+    public record TaskFilter(
+            TaskStatus status,
+            TaskPriority priority,
+            TaskCategory category,
+            Set<TaskStatus> excludedStatuses
+    ) {
+
+        public TaskFilter {
+            excludedStatuses = excludedStatuses == null ? Set.of() : excludedStatuses;
+        }
 
         public static TaskFilter none() {
-            return new TaskFilter(null, null, null);
+            return new TaskFilter(null, null, null, Set.of());
         }
 
         public static TaskFilter byStatus(TaskStatus status) {
-            return new TaskFilter(status, null, null);
+            return new TaskFilter(status, null, null, Set.of());
         }
 
         public static TaskFilter byPriority(TaskPriority priority) {
-            return new TaskFilter(null, priority, null);
+            return new TaskFilter(null, priority, null, Set.of());
         }
 
         public static TaskFilter byCategory(TaskCategory category) {
-            return new TaskFilter(null, null, category);
+            return new TaskFilter(null, null, category, Set.of());
+        }
+
+        public static TaskFilter excludingStatus(TaskStatus status) {
+            return new TaskFilter(null, null, null, EnumSet.of(status));
         }
     }
 }

@@ -15,6 +15,7 @@ import infrastructure.http.dto.ListTasksResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ListTasksAction implements HttpHandler {
 
@@ -45,7 +46,7 @@ public class ListTasksAction implements HttpHandler {
 
             ListTasksUseCase.TaskFilter filter = (status == null && priority == null && category == null)
                     ? null
-                    : new ListTasksUseCase.TaskFilter(status, priority, category);
+                    : new ListTasksUseCase.TaskFilter(status, priority, category, Set.of());
 
             List<Task> tasks = listTasksUseCase.execute(user.getId(), filter);
 

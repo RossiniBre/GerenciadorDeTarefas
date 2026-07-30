@@ -12,6 +12,7 @@ public class CompleteTaskUseCase {
 
     public Task execute(String taskId, User loggedUser) {
         Task task = repo.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
+        task.verifyOwnership(loggedUser.getId());
         task.completeTask();
         return repo.save(task);
     }

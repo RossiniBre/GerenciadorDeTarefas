@@ -12,7 +12,8 @@ public class StartTaskUseCase {
 
     public Task execute(String taskId, User loggedUser) {
         Task task = repo.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
-        task.startTask(); 
+        task.verifyOwnership(loggedUser.getId());
+        task.startTask();
         return repo.save(task);
     }
 }
