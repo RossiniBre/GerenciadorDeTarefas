@@ -260,24 +260,36 @@ This approach prevents uncontrolled assistant behavior and keeps the interaction
 
 ## Assistant task operations
 
-The assistant workflow was expanded from suggestion generation into a complete task management flow.
+he assistant workflow was expanded from task suggestion generation into task management operations.
 
 Implemented capabilities:
 
 * Natural language task creation
-* Task update through conversational requests
-* Task deletion through assistant commands
-* Task start and completion actions
-* Task listing based on user requests
-* Confirmation and rejection flow for generated suggestions
+* Task listing through natural language requests
+* Task update requests
+* Task deletion requests
+* Task lifecycle actions (start and complete)
+* Structured assistant responses
 
-The assistant does not directly modify tasks.
+The assistant does not directly modify the domain.
+
+All operations still pass through the existing application use cases, preserving validations, ownership rules, and business constraints.
 
 ---
 
-## Assistant conversation memory
+## Assistant session management
 
-Conversation context was added using token-based sessions.
+The assistant workflow introduced session-based context management.
+
+Implemented:
+
+* Assistant session abstraction
+* Session repository contract
+* Redis-based session persistence
+* In-memory session implementation for testing
+* User-scoped assistant interactions
+
+The current implementation maintains assistant-related session data, preparing the architecture for future conversational context handling.
 
 Implemented:
 
