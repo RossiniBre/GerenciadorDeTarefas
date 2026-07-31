@@ -15,24 +15,13 @@ public class TaskFilterResolver {
             return TaskFilter.none();
         }
 
-        TaskStatus status = parseEnum(TaskStatus.class, intent.status());
-        TaskPriority priority = parseEnum(TaskPriority.class, intent.priority());
-        TaskCategory category = parseEnum(TaskCategory.class, intent.category());
-        TaskStatus excluded = parseEnum(TaskStatus.class, intent.excludeStatus());
+        TaskStatus status = EnumParser.parse(TaskStatus.class, intent.status());
+        TaskPriority priority = EnumParser.parse(TaskPriority.class, intent.priority());
+        TaskCategory category = EnumParser.parse(TaskCategory.class, intent.category());
+        TaskStatus excluded = EnumParser.parse(TaskStatus.class, intent.excludeStatus());
 
         Set<TaskStatus> excludedStatuses = excluded == null ? Set.of() : EnumSet.of(excluded);
 
         return new TaskFilter(status, priority, category, excludedStatuses);
-    }
-
-    private <E extends Enum<E>> E parseEnum(Class<E> enumClass, String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        try {
-            return Enum.valueOf(enumClass, value.trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
     }
 }

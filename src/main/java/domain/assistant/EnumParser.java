@@ -1,4 +1,4 @@
-package domain.model;
+package domain.assistant;
 
 public final class EnumParser {
 

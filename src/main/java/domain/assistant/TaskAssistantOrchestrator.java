@@ -1,7 +1,6 @@
 package domain.assistant;
 
 import application.usecases.ListTasksUseCase;
-import domain.model.EnumParser;
 import domain.model.Task;
 import domain.model.TaskCategory;
 import domain.model.TaskPriority;
@@ -100,7 +99,13 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
         };
     }
 
-    private <E extends Enum<E>> E parseEnum(Class<E> enumClass, String value) { /* igual ao TaskFilterResolver */ }
-
-    private String lastUserMessage(List<Message> history) { /* pega a última mensagem do usuário */ }
+    private String lastUserMessage(List<Message> history) {
+        for (int i = history.size() - 1; i >= 0; i--) {
+            Message message = history.get(i);
+            if (message.author() == MessageAuthor.USER) {
+                return message.content();
+            }
+        }
+        throw new IllegalArgumentException("Histórico não contém nenhuma mensagem do usuário!");
+    }
 }

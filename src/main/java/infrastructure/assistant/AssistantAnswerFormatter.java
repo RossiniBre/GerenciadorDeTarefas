@@ -14,7 +14,7 @@ import java.util.Map;
 public class AssistantAnswerFormatter implements AnswerFormatter {
 
     private static final String ENDPOINT =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+            "https://openrouter.ai/api/v1/chat/completions";
 
     private final HttpClient httpClient;
     private final JsonMapper jsonMapper;
@@ -35,15 +35,22 @@ public class AssistantAnswerFormatter implements AnswerFormatter {
         String prompt = instructions + "\n\nDados: " + data;
 
         Map<String, Object> body = Map.of(
-                "contents", List.of(
-                        Map.of("parts", List.of(Map.of("text", prompt)))
+                "model", "openrouter/free",
+                "messages", List.of(
+                        Map.of(
+                                "role", "user",
+                                "content", prompt
+                        )
                 )
         );
 
+        // debug
+        System.out.println(jsonMapper.toJson(body));
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ENDPOINT))
+                .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
-                .header("x-goog-api-key", apiKey)
                 .timeout(Duration.ofSeconds(15))
                 .POST(HttpRequest.BodyPublishers.ofString(jsonMapper.toJson(body)))
                 .build();
@@ -52,7 +59,7 @@ public class AssistantAnswerFormatter implements AnswerFormatter {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                throw new AssitantRequestFailedException(
+                throw new AssistantRequestFailedException(
                         "ASSISTANT retornou status " + response.statusCode() + ": " + response.body());
             }
 
@@ -60,22 +67,28 @@ public class AssistantAnswerFormatter implements AnswerFormatter {
 
         } catch (java.io.IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new AssitantRequestFailedException("Falha ao chamar ASSISTANT API", e);
+            throw new AssistantRequestFailedException("Falha ao chamar ASSISTANT API", e);
         }
     }
 
     @SuppressWarnings("unchecked")
     private String extractTextFromResponse(String rawJson) {
-        Map<String, Object> parsed = jsonMapper.fromJson(rawJson, Map.class);
-        List<Map<String, Object>> candidates = (List<Map<String, Object>>) parsed.get("candidates");
 
-        if (candidates == null || candidates.isEmpty()) {
-            throw new AssitantRequestFailedException("ASSISTANT não retornou candidates na resposta");
+        Map<String, Object> parsed =
+                jsonMapper.fromJson(rawJson, Map.class);
+
+        List<Map<String, Object>> choices =
+                (List<Map<String, Object>>) parsed.get("choices");
+
+        if (choices == null || choices.isEmpty()) {
+            throw new AssistantRequestFailedException(
+                    "ASSISTANT não retornou choices na resposta"
+            );
         }
 
-        Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
-        List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+        Map<String, Object> message =
+                (Map<String, Object>) choices.get(0).get("message");
 
-        return (String) parts.get(0).get("text");
+        return (String) message.get("content");
     }
 }

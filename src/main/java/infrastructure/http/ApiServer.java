@@ -2,9 +2,7 @@ package infrastructure.http;
 
 import application.usecases.*;
 import com.sun.net.httpserver.HttpServer;
-import domain.assistant.AnswerFormatter;
-import domain.assistant.IntentExtractor;
-import domain.assistant.RateLimiter;
+import domain.assistant.*;
 import domain.repositories.SessionRepository;
 import domain.repositories.TaskRepository;
 import domain.repositories.UserRepository;
@@ -45,11 +43,30 @@ public class ApiServer {
         this.taskRepository = taskRepository;
     }
 
+    private static String loadSystemInstructions() {
+        try (var input = ApiServer.class.getClassLoader()
+                .getResourceAsStream("prompts/task-assistant-system-instructions.txt")) {
+
+            if (input == null) {
+                throw new IllegalStateException("Arquivo não encontrado.");
+            }
+
+            return new String(
+                    input.readAllBytes(),
+                    java.nio.charset.StandardCharsets.UTF_8
+            );
+
+        } catch (IOException e) {
+            throw new IllegalStateException("Erro ao carregar o prompt.", e);
+        }
+    }
+
     public void start(int port) throws IOException {
 
         // 1
         JsonMapper jsonMapper = new GsonJsonMapper();
         AssistantConfig assistantConfig = AssistantConfig.load();
+        String systemInstructions = loadSystemInstructions();
         HttpClient httpClient = HttpClient.newHttpClient();
 
         // 2
@@ -74,6 +91,18 @@ public class ApiServer {
                                 assistantConfig.getApiKey()
                         ),
                         assistantRateLimiter
+                );
+
+        TaskFilterResolver taskFilterResolver = new TaskFilterResolver();
+
+        TaskAssistantOrchestrator orchestrator =
+                new TaskAssistantOrchestrator(
+                        intentExtractor,
+                        answerFormatter,
+                        taskFilterResolver,
+                        listTasksUseCase,
+                        jsonMapper,
+                        systemInstructions
                 );
 
         // 3
@@ -133,12 +162,31 @@ public class ApiServer {
                 "/users",
                 new UsersHandler(registerAction, loginAction, logoutAction)
         );
-        
+
         // 6
+        AssistantAction assistantAction =
+                new AssistantAction(
+                        orchestrator,
+                        jsonMapper
+                );
+
+        AssistantHandler assistantHandler =
+                new AssistantHandler(
+                        assistantAction,
+                        sessionRepository,
+                        userRepository
+                );
+
+        server.createContext(
+                "/assistant",
+                assistantHandler
+        );
+
+        // 7
         server.setExecutor(null);
         server.start();
 
-        // 7
+        // 8
         System.out.println("API rodando na porta " + port);
     }
 }
