@@ -1,8 +1,11 @@
 package infrastructure.http;
 
 import application.usecases.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpServer;
 import domain.assistant.*;
+import domain.repositories.AssistantSessionRepository;
 import domain.repositories.SessionRepository;
 import domain.repositories.TaskRepository;
 import domain.repositories.UserRepository;
@@ -16,8 +19,11 @@ import infrastructure.http.json.GsonJsonMapper;
 import infrastructure.http.json.JsonMapper;
 import infrastructure.persistence.InMemoryLoginRateLimiter;
 import infrastructure.persistence.InMemorySessionRepository;
+import infrastructure.persistence.RedisAssistantSessionRepository;
+import infrastructure.persistence.TaskSuggestionAdapter;
 import infrastructure.security.Pbkdf2PasswordHasher;
 import infrastructure.security.UuidTokenGenerator;
+import redis.clients.jedis.JedisPool;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -43,12 +49,11 @@ public class ApiServer {
         this.taskRepository = taskRepository;
     }
 
-    private static String loadSystemInstructions() {
-        try (var input = ApiServer.class.getClassLoader()
-                .getResourceAsStream("prompts/task-assistant-system-instructions.txt")) {
+    private static String loadInstructions(String resourcePath) {
+        try (var input = ApiServer.class.getClassLoader().getResourceAsStream(resourcePath)) {
 
             if (input == null) {
-                throw new IllegalStateException("Arquivo não encontrado.");
+                throw new IllegalStateException("Arquivo não encontrado: " + resourcePath);
             }
 
             return new String(
@@ -57,7 +62,7 @@ public class ApiServer {
             );
 
         } catch (IOException e) {
-            throw new IllegalStateException("Erro ao carregar o prompt.", e);
+            throw new IllegalStateException("Erro ao carregar o prompt: " + resourcePath, e);
         }
     }
 
@@ -66,7 +71,8 @@ public class ApiServer {
         // 1
         JsonMapper jsonMapper = new GsonJsonMapper();
         AssistantConfig assistantConfig = AssistantConfig.load();
-        String systemInstructions = loadSystemInstructions();
+        String systemInstructions = loadInstructions("prompts/task-assistant-system-instructions.txt");
+        String answerFormatterInstructions = loadInstructions("prompts/task-assistant-answer-formatter-instructions.txt");
         HttpClient httpClient = HttpClient.newHttpClient();
 
         // 2
@@ -102,7 +108,8 @@ public class ApiServer {
                         taskFilterResolver,
                         listTasksUseCase,
                         jsonMapper,
-                        systemInstructions
+                        systemInstructions,
+                        answerFormatterInstructions
                 );
 
         // 3
@@ -164,17 +171,65 @@ public class ApiServer {
         );
 
         // 6
-        AssistantAction assistantAction =
-                new AssistantAction(
-                        orchestrator,
-                        jsonMapper
+        Gson assistantGson = new GsonBuilder()
+                .registerTypeAdapter(TaskSuggestion.class, new TaskSuggestionAdapter())
+                .create();
+
+        JedisPool jedisPool = new JedisPool("localhost", 6379);
+        AssistantSessionRepository assistantSessionRepository =
+                new RedisAssistantSessionRepository(jedisPool, assistantGson);
+
+        SendMessageToAssistantUseCase sendMessageToAssistantUseCase =
+                new SendMessageToAssistantUseCase(
+                        assistantSessionRepository,
+                        orchestrator
+                );
+
+        StartTaskUseCase startTaskUseCase = new StartTaskUseCase(taskRepository);
+        CompleteTaskUseCase completeTaskUseCase = new CompleteTaskUseCase(taskRepository);
+
+        ConfirmTaskSuggestionUseCase confirmTaskSuggestionUseCase =
+                new ConfirmTaskSuggestionUseCase(
+                        assistantSessionRepository,
+                        createTaskUseCase,
+                        updateTaskUseCase,
+                        deleteTaskUseCase,
+                        startTaskUseCase,
+                        completeTaskUseCase
+                );
+
+        RejectTaskSuggestionUseCase rejectTaskSuggestionUseCase =
+                new RejectTaskSuggestionUseCase(assistantSessionRepository);
+
+        SendMessageAssistantAction sendMessageAssistantAction =
+                new SendMessageAssistantAction(
+                        sendMessageToAssistantUseCase,
+                        jsonMapper,
+                        userRepository,
+                        sessionRepository
+                );
+
+        ConfirmSuggestionAction confirmSuggestionAction =
+                new ConfirmSuggestionAction(
+                        confirmTaskSuggestionUseCase,
+                        jsonMapper,
+                        userRepository,
+                        sessionRepository
+                );
+
+        RejectSuggestionAction rejectSuggestionAction =
+                new RejectSuggestionAction(
+                        rejectTaskSuggestionUseCase,
+                        jsonMapper,
+                        userRepository,
+                        sessionRepository
                 );
 
         AssistantHandler assistantHandler =
                 new AssistantHandler(
-                        assistantAction,
-                        sessionRepository,
-                        userRepository
+                        sendMessageAssistantAction,
+                        confirmSuggestionAction,
+                        rejectSuggestionAction
                 );
 
         server.createContext(

@@ -2,73 +2,39 @@ package infrastructure.http;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import domain.model.User;
-import domain.repositories.SessionRepository;
-import domain.repositories.UserRepository;
-import infrastructure.http.actions.AssistantAction;
 import infrastructure.http.json.HttpJson;
 
 import java.io.IOException;
 
 public class AssistantHandler implements HttpHandler {
 
-    private final AssistantAction assistantAction;
-    private final SessionRepository sessionRepository;
-    private final UserRepository userRepository;
+    private final HttpHandler sendMessageAction;
+    private final HttpHandler confirmAction;
+    private final HttpHandler rejectAction;
 
     public AssistantHandler(
-            AssistantAction assistantAction,
-            SessionRepository sessionRepository,
-            UserRepository userRepository
+            HttpHandler sendMessageAction,
+            HttpHandler confirmAction,
+            HttpHandler rejectAction
     ) {
-        this.assistantAction = assistantAction;
-        this.sessionRepository = sessionRepository;
-        this.userRepository = userRepository;
+        this.sendMessageAction = sendMessageAction;
+        this.confirmAction = confirmAction;
+        this.rejectAction = rejectAction;
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+            HttpJson.sendResponse(exchange, 405, "{\"error\":\"Method not allowed\"}");
+            return;
+        }
 
-        // debug
-        System.out.println("ENTROU NO ASSISTANT HANDLER");
-
-        try {
-
-            if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
-                exchange.sendResponseHeaders(405, -1);
-                return;
-            }
-
-            User user = AuthContext.requireUser(
-                    exchange,
-                    sessionRepository,
-                    userRepository
-            );
-
-            String body = HttpJson.readBody(
-                    exchange.getRequestBody()
-            );
-
-            String response = assistantAction.execute(
-                    body,
-                    user
-            );
-
-            HttpJson.sendResponse(
-                    exchange,
-                    200,
-                    response
-            );
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            HttpJson.sendResponse(
-                    exchange,
-                    500,
-                    "{\"error\":\"" + e.getMessage() + "\"}"
-            );
+        String path = exchange.getRequestURI().getPath();
+        switch (path) {
+            case "/assistant/message" -> sendMessageAction.handle(exchange);
+            case "/assistant/confirm" -> confirmAction.handle(exchange);
+            case "/assistant/reject" -> rejectAction.handle(exchange);
+            default -> HttpJson.sendResponse(exchange, 404, "{\"error\":\"Not Found\"}");
         }
     }
 }
