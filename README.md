@@ -203,7 +203,7 @@ Current automated coverage:
 * Unauthorized requests
 * Invalid credentials handling
 
-Current test suite: 49 automated tests passing
+Current test suite: 54 automated tests passing
 
 ---
 
@@ -226,14 +226,13 @@ This allows:
 
 This behavior is intentional and simulates independent user registrations.
 
-# Phase 6 — AI-assisted task creation
+# Phase 6 — AI Task Assistant and conversational workflow
 
 ## Assistant workflow foundation
 
-The project started introducing an AI-assisted workflow for creating tasks through natural language.
+The project introduced an AI-powered assistant capable of managing tasks through natural language conversations.
 
-The objective is to allow users to describe tasks conversationally while maintaining the same architectural principles used throughout the project: separation of responsibilities, domain isolation, and controlled data flow.
-
+The objective is to provide a conversational task management experience while preserving the same architectural principles used throughout the project: separation of responsibilities, domain isolation, controlled data flow, and business rules enforcement.
 Implemented so far:
 
 * Assistant workflow foundation
@@ -241,6 +240,13 @@ Implemented so far:
 * Structured assistant response flow
 * Validation pipeline before task creation
 * Task suggestion generation contract
+* Conversational assistant workflow
+* Task operation suggestions
+* Confirmation and rejection flow
+* Pending suggestion management
+* Redis-based conversation persistence
+* Assistant context restoration
+* Human-readable assistant history
 
 ---
 
@@ -260,7 +266,7 @@ This approach prevents uncontrolled assistant behavior and keeps the interaction
 
 ## Assistant task operations
 
-he assistant workflow was expanded from task suggestion generation into task management operations.
+The assistant workflow was expanded from task suggestion generation into task management operations.
 
 Implemented capabilities:
 
@@ -275,6 +281,8 @@ The assistant does not directly modify the domain.
 
 All operations still pass through the existing application use cases, preserving validations, ownership rules, and business constraints.
 
+All task mutations require explicit user confirmation before execution.
+
 ---
 
 ## Assistant session management
@@ -283,21 +291,14 @@ The assistant workflow introduced session-based context management.
 
 Implemented:
 
-* Assistant session abstraction
-* Session repository contract
-* Redis-based session persistence
-* In-memory session implementation for testing
-* User-scoped assistant interactions
-
-The current implementation maintains assistant-related session data, preparing the architecture for future conversational context handling.
-
-Implemented:
-
-* `AssistantSession`
-* `AssistantSessionRepository`
+* AssistantSession
+* AssistantSessionRepository
 * Redis-based session persistence
 * Docker Redis container integration
 * In-memory session implementation for testing
+* User-scoped assistant interactions
+* Conversation history persistence
+* Pending suggestion persistence
 
 ---
 
@@ -346,13 +347,15 @@ src/main/java
 │   │   ├── dto
 │   │   ├── ApiServer
 │   │   ├── TasksHandler
-│   │   ├── UserHandlers
+│   │   ├── UserHandler
+│   │   ├── AssistantHandler
 │   │   ├── Actions
 │   │   ├── JsonMapper
 │   │   ├── GsonJsonMapper
 │   │   └── HttpJson
 │   │
 │   ├── config
+│   │   ├── AssistantConfig
 │   │   └── DatabaseConfig
 │   │   
 │   ├── security
@@ -398,16 +401,16 @@ The domain layer has no dependency on:
 
 # Roadmap
 
-| Phase | Status  | Scope                                |
-| ----- | ------- | ------------------------------------ |
-| 1     | Done    | Task creation                        |
-| 2     | Done    | Update, delete, tests                |
-| 3     | Done    | Categories, priorities, Builder      |
-| 4     | Done    | Users, authentication, authorization |
-| 5     | Done    | MySQL, REST API, HTTP adapters       |
-| 6 | In Progress | AI assistant workflow, conversational memory and task operations |
-| 7     | | Notifications                                |
-| 8     | | Migration to Spring Boot                     |
+| Phase        | Status | Scope                                |
+|--------------|--------| ------------------------------------ |
+| 1            | Done   | Task creation                        |
+| 2            | Done   | Update, delete, tests                |
+| 3            | Done   | Categories, priorities, Builder      |
+| 4            | Done   | Users, authentication, authorization |
+| 5            | Done   | MySQL, REST API, HTTP adapters       |
+| 6            | Done   | AI assistant workflow, conversational memory and task operations |
+| 7 |   In Progress     | Notifications                                |
+| 8            |        | Migration to Spring Boot                     |
 ----------------------------------------------------------
 
 
@@ -424,6 +427,7 @@ The domain layer has no dependency on:
 * WSL2
 * Postman
 * Redis
+* OpenRouter API (LLM integration)
 
 ---
 
@@ -448,6 +452,7 @@ DB_HOST
 DB_PORT
 DB_USER
 DB_PASSWORD
+ASSISTANT_API_KEY
 ```
 
 The HTTP server starts locally and exposes the REST endpoints.
@@ -484,5 +489,8 @@ Final goals:
 * Authorization
 * MySQL persistence
 * Automated API testing
-* AI-assisted task creation
+* AI-powered task assistant
+* Conversational task management
+* Context-aware assistant sessions
+* * Safe AI-driven task execution workflow
 * Spring Boot migration

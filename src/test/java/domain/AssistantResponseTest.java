@@ -75,7 +75,7 @@ class AssistantResponseTest {
 
     @Test
     void shouldAllowTaskAssistantStrategyImplementation() {
-        TaskAssistant fakeAssistant = (conversationHistory, requesterId) ->
+        TaskAssistant fakeAssistant = context ->
                 new AssistantResponse.MissingInfos(
                         "What is the task title?"
                 );
@@ -86,8 +86,11 @@ class AssistantResponseTest {
         );
 
         AssistantResponse response = fakeAssistant.process(
-                List.of(userMessage),
-                UUID.randomUUID().toString()
+                new AssistantContext(
+                        List.of(userMessage),
+                        List.of(),
+                        UUID.randomUUID().toString()
+                )
         );
 
         assertInstanceOf(
