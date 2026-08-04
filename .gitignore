@@ -37,3 +37,31 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Environment ###
+.env
+.env.*
+!.env.example
+
+### Logs ###
+logs/
+*.log
+
+### Runtime ###
+hs_err_pid*
+replay_pid*
+
+### Local databases ###
+*.db
+*.sqlite
+*.sqlite3
+
+### Docker volumes (optional) ###
+docker-data/
+mysql-data/
+redis-data/
+
+### Certificates ###
+*.pem
+*.key
+*.p12

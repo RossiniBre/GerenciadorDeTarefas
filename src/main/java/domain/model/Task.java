@@ -4,6 +4,7 @@ import domain.exceptions.InvalidFieldException;
 import domain.exceptions.InvalidTaskStateException;
 import domain.exceptions.UnauthorizedTaskAccessException;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Task {
@@ -14,8 +15,10 @@ public class Task {
     private TaskPriority priority;
     private TaskCategory category;
     private String ownerId;
+    private LocalDateTime dueDate;
+    private LocalDateTime reminderDate;
 
-    private Task(String title, String description, TaskStatus status, String id, TaskPriority priority, TaskCategory category, String ownerId){
+    private Task(String title, String description, TaskStatus status, String id, TaskPriority priority, TaskCategory category, String ownerId, LocalDateTime dueDate, LocalDateTime reminderDate){
         if (title == null || title.isBlank()){
             throw new InvalidFieldException("Título é obrigatório!");
         }
@@ -29,14 +32,19 @@ public class Task {
             throw new InvalidFieldException("Tarefa sem dono!");
         }
         this.ownerId = ownerId;
+        if (dueDate != null && reminderDate != null && reminderDate.isAfter(dueDate)) {
+            throw new InvalidFieldException("reminderDate não pode ser depois de dueDate");
+        }
+        this.dueDate = dueDate;
+        this.reminderDate = reminderDate;
     }
 
-    public static Task newTask(String title, String description, String ownerId){
-        return new Task(title, description, TaskStatus.PENDING, UUID.randomUUID().toString(), TaskPriority.LOW, TaskCategory.UNCATEGORIZED, ownerId);
+    public static Task newTask(String title, String description, String ownerId, LocalDateTime dueDate, LocalDateTime reminderDate){
+        return new Task(title, description, TaskStatus.PENDING, UUID.randomUUID().toString(), TaskPriority.LOW, TaskCategory.UNCATEGORIZED, ownerId, dueDate, reminderDate);
     }
 
-    public static Task rebuiltTask(String title, String description, TaskStatus status, String id, TaskPriority priority, TaskCategory category, String ownerId){
-        return new Task(title, description, status, id, priority, category, ownerId);
+    public static Task rebuiltTask(String title, String description, TaskStatus status, String id, TaskPriority priority, TaskCategory category, String ownerId, LocalDateTime dueDate, LocalDateTime reminderDate){
+        return new Task(title, description, status, id, priority, category, ownerId, dueDate, reminderDate);
     }
 
     // getters
@@ -47,6 +55,8 @@ public class Task {
     public TaskPriority getPriority(){ return priority; }
     public TaskCategory getCategory(){ return category; }
     public String getOwnerId(){ return ownerId; }
+    public LocalDateTime getDueDate(){ return dueDate; }
+    public LocalDateTime getReminderDate(){ return reminderDate; }
 
 
     // Iniciar/finalizar/Atualizar
@@ -86,6 +96,20 @@ public class Task {
             throw new InvalidFieldException("Escolha uma categoria!");
         }
         this.category = category;
+    }
+
+    public void updateDueDate(LocalDateTime dueDate) {
+        if (dueDate != null && reminderDate != null && reminderDate.isAfter(dueDate)) {
+            throw new InvalidFieldException("reminderDate não pode ser depois de dueDate");
+        }
+        this.dueDate = dueDate;
+    }
+
+    public void updateReminderDate(LocalDateTime reminderDate) {
+        if (reminderDate != null && dueDate != null && reminderDate.isAfter(dueDate)) {
+            throw new InvalidFieldException("reminderDate não pode ser depois de dueDate");
+        }
+        this.reminderDate = reminderDate;
     }
 
     public void verifyOwnership(String requesterId) {

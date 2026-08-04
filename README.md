@@ -492,5 +492,5 @@ Final goals:
 * AI-powered task assistant
 * Conversational task management
 * Context-aware assistant sessions
-* * Safe AI-driven task execution workflow
+* Safe AI-driven task execution workflow
 * Spring Boot migration

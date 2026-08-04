@@ -1,4 +1,4 @@
-package application.usecases;
+package application;
 
 import domain.assistant.AssistantSession;
 import domain.assistant.TaskSuggestion;
@@ -53,7 +53,9 @@ public class ConfirmTaskSuggestionUseCase {
                             s.description(),
                             loggedUser,
                             s.priority(),
-                            s.category()
+                            s.category(),
+                            null,   // dueDate
+                            null    // reminderDate
                     );
 
             case TaskSuggestion.Update s ->
@@ -62,6 +64,8 @@ public class ConfirmTaskSuggestionUseCase {
                             s.description(),
                             s.priority(),
                             s.category(),
+                            null,   // dueDate
+                            null,   // reminderDate
                             s.targetTaskId(),
                             requesterId
                     );

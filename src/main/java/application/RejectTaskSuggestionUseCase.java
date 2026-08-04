@@ -1,4 +1,4 @@
-package application.usecases;
+package application;
 
 import domain.assistant.AssistantSession;
 import domain.assistant.TaskSuggestion;

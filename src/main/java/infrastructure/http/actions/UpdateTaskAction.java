@@ -1,6 +1,6 @@
 package infrastructure.http.actions;
 
-import application.usecases.UpdateTaskDetailsUseCase;
+import application.UpdateTaskDetailsUseCase;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import domain.model.Task;
@@ -18,6 +18,7 @@ import infrastructure.http.dto.UpdateTaskRequest;
 import infrastructure.http.dto.UpdateTaskResponse;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 public class UpdateTaskAction implements HttpHandler {
 
@@ -45,8 +46,10 @@ public class UpdateTaskAction implements HttpHandler {
 
             TaskPriority priority = request.priority != null ? TaskPriority.valueOf(request.priority) : null;
             TaskCategory category = request.category != null ? TaskCategory.valueOf(request.category) : null;
+            LocalDateTime dueDate = request.dueDate != null ? LocalDateTime.parse(request.dueDate) : null;
+            LocalDateTime reminderDate = request.reminderDate != null ? LocalDateTime.parse(request.reminderDate) : null;
 
-            Task task = updateTaskUseCase.execute(request.title, request.description, priority, category, id, user.getId());
+            Task task = updateTaskUseCase.execute(request.title, request.description, priority, category, dueDate, reminderDate, id, user.getId());
 
             var response = new UpdateTaskResponse(task.getId(), task.getTitle(), task.getStatus().name(), task.getPriority().name(), task.getCategory().name());
             HttpJson.sendResponse(exchange, 200, jsonMapper.toJson(response));

@@ -1,6 +1,5 @@
 package application;
 
-import application.usecases.DeleteTaskUseCase;
 import domain.model.Task;
 import infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,7 @@ public class DeleteTaskUseCaseTest {
     void shouldDeleteTask(){
         //Arrange
         InMemoryTaskRepository repo = new InMemoryTaskRepository();
-        Task existingTask = Task.newTask("Titulo original", "Descricao Original", "owner-123");
+        Task existingTask = Task.newTask("Titulo original", "Descricao Original", "owner-123", null, null);
         repo.save(existingTask);
         String existingId = existingTask.getId();
 

@@ -1,5 +1,6 @@
 package application.usecases;
 
+import application.RejectTaskSuggestionUseCase;
 import domain.assistant.AssistantSession;
 import domain.assistant.TaskSuggestion;
 import domain.repositories.AssistantSessionRepository;

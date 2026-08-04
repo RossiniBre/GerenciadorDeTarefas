@@ -4,8 +4,8 @@ import infrastructure.config.DatabaseConfig;
 import infrastructure.persistence.mysql.MySqlTaskRepository;
 import infrastructure.persistence.mysql.MySqlUserRepository;
 import infrastructure.http.ApiServer;
-import application.usecases.CreateTaskUseCase;
-import application.usecases.ListTasksUseCase;
+import application.CreateTaskUseCase;
+import application.ListTasksUseCase;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -21,7 +21,7 @@ public class Main {
         UserRepository userRepository = new MySqlUserRepository(connection);
         TaskRepository taskRepository = new MySqlTaskRepository(connection);
 
-        CreateTaskUseCase createTaskUseCase = new CreateTaskUseCase(taskRepository);
+        CreateTaskUseCase createTaskUseCase = new CreateTaskUseCase(taskRepository, java.time.Clock.systemDefaultZone());
         ListTasksUseCase listTasksUseCase = new ListTasksUseCase(taskRepository);
 
         ApiServer apiServer = new ApiServer(createTaskUseCase, listTasksUseCase, userRepository, taskRepository);

@@ -22,7 +22,9 @@ class TaskSuggestionTypeAdapterTest {
                 "Comprar pão",
                 "Padaria",
                 TaskPriority.HIGH,
-                TaskCategory.PERSONAL
+                TaskCategory.PERSONAL,
+                null,
+                null
         );
 
         String json = gson.toJson(original, TaskSuggestion.class);
@@ -44,7 +46,9 @@ class TaskSuggestionTypeAdapterTest {
                 "Novo título",
                 "Nova descrição",
                 TaskPriority.MEDIUM,
-                TaskCategory.WORK
+                TaskCategory.WORK,
+                null,
+                null
         );
 
         String json = gson.toJson(original, TaskSuggestion.class);

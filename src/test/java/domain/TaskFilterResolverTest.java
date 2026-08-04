@@ -1,9 +1,8 @@
 package domain;
 
-import application.usecases.ListTasksUseCase.TaskFilter;
+import application.ListTasksUseCase.TaskFilter;
 import domain.assistant.TaskFilterIntent;
 import domain.assistant.TaskFilterResolver;
-import domain.model.TaskCategory;
 import domain.model.TaskPriority;
 import domain.model.TaskStatus;
 import org.junit.jupiter.api.Test;

@@ -19,7 +19,9 @@ class AssistantResponseTest {
                 "Study Java",
                 "Review sealed interfaces",
                 TaskPriority.MEDIUM,
-                TaskCategory.STUDY
+                TaskCategory.STUDY,
+                null,
+                null
         );
 
         AssistantResponse response = new AssistantResponse.ValidSuggestions(

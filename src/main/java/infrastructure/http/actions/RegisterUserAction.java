@@ -1,6 +1,6 @@
 package infrastructure.http.actions;
 
-import application.usecases.RegisterUserUseCase;
+import application.RegisterUserUseCase;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import domain.model.User;

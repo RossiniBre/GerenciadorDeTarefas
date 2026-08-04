@@ -5,4 +5,6 @@ public class UpdateTaskRequest {
     public String description;
     public String priority;
     public String category;
+    public String dueDate;
+    public String reminderDate;
 }

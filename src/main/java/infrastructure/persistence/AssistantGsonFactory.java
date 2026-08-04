@@ -9,6 +9,9 @@ public final class AssistantGsonFactory {
     private AssistantGsonFactory() {}
 
     public static Gson create() {
-        return new GsonBuilder().registerTypeAdapter(TaskSuggestion.class, new TaskSuggestionTypeAdapter()).create();
+        return new GsonBuilder()
+                .registerTypeAdapter(TaskSuggestion.class, new TaskSuggestionTypeAdapter())
+                .registerTypeAdapter(java.time.LocalDateTime.class, new LocalDateTimeTypeAdapter())
+                .create();
     }
 }

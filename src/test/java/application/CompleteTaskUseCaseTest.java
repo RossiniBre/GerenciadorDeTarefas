@@ -1,6 +1,5 @@
 package application;
 
-import application.usecases.CompleteTaskUseCase;
 import domain.model.Task;
 import domain.model.TaskStatus;
 import domain.model.User;
@@ -21,7 +20,9 @@ public class CompleteTaskUseCaseTest {
         Task existingTask = Task.newTask(
                 "Titulo original",
                 "Descricao Original",
-                user.getId()
+                user.getId(),
+                null,
+                null
         );
 
         existingTask.startTask();

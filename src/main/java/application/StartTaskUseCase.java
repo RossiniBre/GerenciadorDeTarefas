@@ -1,4 +1,4 @@
-package application.usecases;
+package application;
 
 import domain.model.Task;
 import domain.model.User;

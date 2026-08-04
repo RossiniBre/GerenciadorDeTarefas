@@ -1,6 +1,6 @@
 package domain.assistant;
 
-import application.usecases.ListTasksUseCase.TaskFilter;
+import application.ListTasksUseCase.TaskFilter;
 import domain.model.TaskCategory;
 import domain.model.TaskPriority;
 import domain.model.TaskStatus;

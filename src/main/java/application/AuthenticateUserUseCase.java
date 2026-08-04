@@ -1,4 +1,4 @@
-package application.usecases;
+package application;
 
 import domain.security.LoginRateLimiter;
 import domain.repositories.SessionRepository;

@@ -1,6 +1,6 @@
 package infrastructure.http.actions;
 
-import application.usecases.SendMessageToAssistantUseCase;
+import application.SendMessageToAssistantUseCase;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import domain.assistant.AssistantResponse;

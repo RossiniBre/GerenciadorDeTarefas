@@ -3,6 +3,7 @@ package domain.assistant;
 import domain.model.TaskPriority;
 import domain.model.TaskCategory;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public sealed interface TaskSuggestion permits
@@ -19,7 +20,9 @@ public sealed interface TaskSuggestion permits
             String title,
             String description,
             TaskPriority priority,
-            TaskCategory category
+            TaskCategory category,
+            LocalDateTime dueDate,
+            LocalDateTime reminderDate
     ) implements TaskSuggestion {}
 
     record Update(
@@ -28,7 +31,9 @@ public sealed interface TaskSuggestion permits
             String title,
             String description,
             TaskPriority priority,
-            TaskCategory category
+            TaskCategory category,
+            LocalDateTime dueDate,
+            LocalDateTime reminderDate
     ) implements TaskSuggestion {}
 
     record Delete(

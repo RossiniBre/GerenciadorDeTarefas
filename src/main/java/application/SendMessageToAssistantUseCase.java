@@ -1,6 +1,6 @@
-package application.usecases;
+package application;
 
-import application.usecases.ListTasksUseCase.TaskFilter;
+import application.ListTasksUseCase.TaskFilter;
 import domain.assistant.*;
 import domain.model.Task;
 import domain.repositories.AssistantSessionRepository;

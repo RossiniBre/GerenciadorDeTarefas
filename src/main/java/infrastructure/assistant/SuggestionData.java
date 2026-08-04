@@ -6,5 +6,7 @@ public record SuggestionData(
         String title,
         String description,
         String priority,
-        String category
+        String category,
+        String dueDate,
+        String reminderDate
 ) {}

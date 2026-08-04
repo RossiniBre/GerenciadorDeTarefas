@@ -1,6 +1,5 @@
 package application;
 
-import application.usecases.*;
 import domain.assistant.AssistantSession;
 import domain.assistant.TaskSuggestion;
 import domain.exceptions.TaskSuggestionNotFoundException;
@@ -15,6 +14,7 @@ import infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,8 +34,10 @@ class ConfirmTaskSuggestionUseCaseTest {
         taskRepository = new InMemoryTaskRepository();
         sessionRepository = new InMemoryAssistantSessionRepository();
 
-        CreateTaskUseCase createTaskUseCase = new CreateTaskUseCase(taskRepository);
-        UpdateTaskDetailsUseCase updateTaskDetailsUseCase = new UpdateTaskDetailsUseCase(taskRepository);
+        Clock clock = Clock.systemDefaultZone();
+
+        CreateTaskUseCase createTaskUseCase = new CreateTaskUseCase(taskRepository, clock);
+        UpdateTaskDetailsUseCase updateTaskDetailsUseCase = new UpdateTaskDetailsUseCase(taskRepository, clock);
         DeleteTaskUseCase deleteTaskUseCase = new DeleteTaskUseCase(taskRepository);
         StartTaskUseCase startTaskUseCase = new StartTaskUseCase(taskRepository);
         CompleteTaskUseCase completeTaskUseCase = new CompleteTaskUseCase(taskRepository);
@@ -57,7 +59,7 @@ class ConfirmTaskSuggestionUseCaseTest {
         UUID suggestionId = UUID.randomUUID();
         TaskSuggestion.Create suggestion = new TaskSuggestion.Create(
                 suggestionId, "Titulo sugerido", "Descricao sugerida",
-                TaskPriority.HIGH, TaskCategory.WORK
+                TaskPriority.HIGH, TaskCategory.WORK, null, null
         );
         sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion)));
 
@@ -72,13 +74,13 @@ class ConfirmTaskSuggestionUseCaseTest {
 
     @Test
     void shouldUpdateTaskWhenConfirmingUpdateSuggestion() {
-        Task existing = Task.newTask("Titulo antigo", "Descricao antiga", owner.getId());
+        Task existing = Task.newTask("Titulo antigo", "Descricao antiga", owner.getId(), null, null);
         taskRepository.save(existing);
 
         UUID suggestionId = UUID.randomUUID();
         TaskSuggestion.Update suggestion = new TaskSuggestion.Update(
                 suggestionId, existing.getId(), "Titulo novo", "Descricao nova",
-                TaskPriority.MEDIUM, TaskCategory.STUDY
+                TaskPriority.MEDIUM, TaskCategory.STUDY, null, null
         );
         sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion)));
 
@@ -91,7 +93,7 @@ class ConfirmTaskSuggestionUseCaseTest {
 
     @Test
     void shouldDeleteTaskWhenConfirmingDeleteSuggestion() {
-        Task existing = Task.newTask("Titulo", "Descricao", owner.getId());
+        Task existing = Task.newTask("Titulo", "Descricao", owner.getId(), null, null);
         taskRepository.save(existing);
 
         UUID suggestionId = UUID.randomUUID();
@@ -105,7 +107,7 @@ class ConfirmTaskSuggestionUseCaseTest {
 
     @Test
     void shouldStartTaskWhenConfirmingStartSuggestion() {
-        Task existing = Task.newTask("Titulo", "Descricao", owner.getId());
+        Task existing = Task.newTask("Titulo", "Descricao", owner.getId(), null, null);
         taskRepository.save(existing);
 
         UUID suggestionId = UUID.randomUUID();
@@ -120,7 +122,7 @@ class ConfirmTaskSuggestionUseCaseTest {
 
     @Test
     void shouldCompleteTaskWhenConfirmingCompleteSuggestion() {
-        Task existing = Task.newTask("Titulo", "Descricao", owner.getId());
+        Task existing = Task.newTask("Titulo", "Descricao", owner.getId(), null, null);
         existing.startTask();
         taskRepository.save(existing);
 
@@ -136,7 +138,7 @@ class ConfirmTaskSuggestionUseCaseTest {
 
     @Test
     void shouldRemoveConfirmedSuggestionFromSessionButKeepOthersAndHistory() {
-        Task existing = Task.newTask("Titulo", "Descricao", owner.getId());
+        Task existing = Task.newTask("Titulo", "Descricao", owner.getId(), null, null);
         taskRepository.save(existing);
 
         UUID confirmedId = UUID.randomUUID();
@@ -175,7 +177,7 @@ class ConfirmTaskSuggestionUseCaseTest {
     @Test
     void shouldThrowWhenConfirmingSuggestionForTaskOwnedByAnotherUser() {
         User anotherUser = User.newUser("owner-456", "hash-fake-456");
-        Task existing = Task.newTask("Titulo", "Descricao", anotherUser.getId());
+        Task existing = Task.newTask("Titulo", "Descricao", anotherUser.getId(), null, null);
         taskRepository.save(existing);
 
         UUID suggestionId = UUID.randomUUID();

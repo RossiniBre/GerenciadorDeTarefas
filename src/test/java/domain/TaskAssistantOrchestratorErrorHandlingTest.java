@@ -1,13 +1,13 @@
 package domain;
 
-import application.usecases.ListTasksUseCase;
+import application.ListTasksUseCase;
 import domain.assistant.*;
 import domain.model.Task;
 import domain.repositories.TaskRepository;
 import infrastructure.http.json.GsonJsonMapper;
-import infrastructure.http.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +51,8 @@ class TaskAssistantOrchestratorErrorHandlingTest {
                 listTasksUseCase,
                 new GsonJsonMapper(),
                 "instrucoes de sistema",
-                "instrucoes de formatacao"
+                "instrucoes de formatacao",
+                Clock.systemDefaultZone()
         );
     }
 

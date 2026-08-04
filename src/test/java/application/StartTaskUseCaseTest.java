@@ -1,6 +1,5 @@
 package application;
 
-import application.usecases.StartTaskUseCase;
 import domain.model.Task;
 import domain.model.TaskStatus;
 import domain.model.User;
@@ -21,7 +20,9 @@ public class StartTaskUseCaseTest {
         Task existingTask = Task.newTask(
                 "Titulo original",
                 "Descricao Original",
-                user.getId()
+                user.getId(),
+                null,
+                null
         );
 
         repo.save(existingTask);

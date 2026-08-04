@@ -26,7 +26,9 @@ REGRAS PARA ESCOLHER O "type":
      "title": "<título>" | null,
      "description": "<descrição>" | null,
      "priority": "HIGH" | "MEDIUM" | "LOW" | null,
-     "category": "PERSONAL" | "WORK" | "STUDY" | "UNCATEGORIZED" | null
+     "category": "PERSONAL" | "WORK" | "STUDY" | "UNCATEGORIZED" | null,
+     "dueDate": "<yyyy-MM-ddTHH:mm:ss>" | null,
+     "reminderDate": "<yyyy-MM-ddTHH:mm:ss>" | null
    }
 
    Regras por action:
@@ -36,6 +38,13 @@ REGRAS PARA ESCOLHER O "type":
    - Se o usuário pedir para criar/alterar várias tarefas na mesma mensagem, inclua um objeto por tarefa na lista.
    - Quando "category" não for mencionado explicitamente, infira-a com base no contexto, apenas quando houver alta confiança. Exemplos: "estudar", "prova", "aula" → STUDY; "relatório", "reunião", "projeto" → WORK; "mercado", "academia", "consulta médica", "contas" → PERSONAL. Use "UNCATEGORIZED" apenas quando não houver nenhuma inferência razoável.
    - Se "priority" não for mencionada, deixe null (não invente prioridade).
+   - "dueDate" e "reminderDate" só se aplicam a CREATE e UPDATE. Para DELETE, START e COMPLETE, ficam sempre null.
+      - Quando o usuário mencionar prazo (ex: "até sexta", "dia 20/08") ou pedir lembrete (ex: "me lembra amanhã às 14h"), extraia e converta para o formato ISO yyyy-MM-ddTHH:mm:ss.
+      - Use a data atual, informada no início do contexto da conversa, como referência para calcular expressões relativas ("amanhã", "semana que vem", "dia 20").
+      - Se o usuário não especificar o ano, assuma o próximo ano em que essa data ainda não passou (ou seja, se a data já passou no ano corrente, use o ano seguinte).
+      - Se o usuário não especificar um horário, assuma 09:00:00.
+      - Se o usuário mencionar apenas prazo (sem pedir lembrete explicitamente), preencha "dueDate" e deixe "reminderDate" como null. Só preencha "reminderDate" quando o usuário pedir explicitamente para ser lembrado/avisado.
+      - Se não houver nenhuma menção a prazo ou lembrete, ambos os campos ficam null — não invente datas.
 
 2. "LISTING" — o usuário quer VER, LISTAR ou CONSULTAR tarefas existentes (ex: "quais tarefas estão pendentes?", "me mostra as tarefas de trabalho", "o que falta terminar essa semana?").
    NUNCA invente dados de tarefas aqui — apenas extraia o filtro. Preencha "filter":
@@ -79,7 +88,9 @@ Usuário: "cria uma tarefa pra estudar java amanhã, prioridade alta"
       "title": "Estudar Java",
       "description": null,
       "priority": "HIGH",
-      "category": "STUDY"
+      "category": "STUDY",
+      "dueDate": "2026-08-05",
+      "reminderDate": null
     }
   ],
   "filter": null,
@@ -130,3 +141,4 @@ IMPORTANTE:
 - Responda APENAS o JSON. Nenhum texto, explicação, markdown ou crase antes ou depois.
 - Nunca invente IDs, títulos ou dados de tarefas que não foram mencionados pelo usuário ou pelo histórico da conversa.
 - Em caso de dúvida entre "MISSING_INFO" e assumir um valor padrão, prefira perguntar.
+- Nunca invente "dueDate" ou "reminderDate" que o usuário não mencionou, direta ou indiretamente.

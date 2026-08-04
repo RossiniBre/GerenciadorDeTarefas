@@ -1,11 +1,15 @@
 package domain.model;
 
+import java.time.LocalDateTime;
+
 public class TaskBuilder {
     private final String ownerId;
     private String title;
     private String description;
     private TaskPriority priority;
     private TaskCategory category;
+    private LocalDateTime dueDate;
+    private LocalDateTime reminderDate;
 
     public TaskBuilder (String ownerId){
         this.ownerId = ownerId;
@@ -31,8 +35,18 @@ public class TaskBuilder {
         return this;
     }
 
+    public TaskBuilder withDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
+        return this;
+    }
+
+    public TaskBuilder withReminderDate(LocalDateTime reminderDate) {
+        this.reminderDate = reminderDate;
+        return this;
+    }
+
     public Task build() {
-        Task task = Task.newTask(title, description, ownerId);
+        Task task = Task.newTask(title, description, ownerId, dueDate, reminderDate);
 
         if (priority != null) {
             task.updatePriority(priority);

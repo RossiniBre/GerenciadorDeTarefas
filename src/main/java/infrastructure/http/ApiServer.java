@@ -1,6 +1,6 @@
 package infrastructure.http;
 
-import application.usecases.*;
+import application.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpServer;
@@ -109,7 +109,8 @@ public class ApiServer {
                         listTasksUseCase,
                         jsonMapper,
                         systemInstructions,
-                        answerFormatterInstructions
+                        answerFormatterInstructions,
+                        Clock.systemDefaultZone()
                 );
 
         // 3
@@ -139,7 +140,7 @@ public class ApiServer {
                 new ListTasksAction(listTasksUseCase, jsonMapper, userRepository, sessionRepository);
 
         UpdateTaskDetailsUseCase updateTaskUseCase =
-                new UpdateTaskDetailsUseCase(taskRepository);
+                new UpdateTaskDetailsUseCase(taskRepository, Clock.systemDefaultZone());
 
         UpdateTaskAction updateAction =
                 new UpdateTaskAction(updateTaskUseCase, jsonMapper, userRepository, sessionRepository);
@@ -182,7 +183,8 @@ public class ApiServer {
         SendMessageToAssistantUseCase sendMessageToAssistantUseCase =
                 new SendMessageToAssistantUseCase(
                         assistantSessionRepository,
-                        orchestrator
+                        orchestrator,
+                        listTasksUseCase
                 );
 
         StartTaskUseCase startTaskUseCase = new StartTaskUseCase(taskRepository);

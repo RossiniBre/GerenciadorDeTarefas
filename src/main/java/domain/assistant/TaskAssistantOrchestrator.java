@@ -1,6 +1,6 @@
 package domain.assistant;
 
-import application.usecases.ListTasksUseCase;
+import application.ListTasksUseCase;
 import domain.model.Task;
 import domain.model.TaskCategory;
 import domain.model.TaskPriority;
@@ -8,6 +8,9 @@ import infrastructure.assistant.IntentExtractionResult;
 import infrastructure.assistant.SuggestionData;
 import infrastructure.http.json.JsonMapper;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +23,7 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
     private final JsonMapper jsonMapper;
     private final String systemInstructions;
     private final String answerFormatterInstructions;
+    private final Clock clock;
 
     public TaskAssistantOrchestrator(
             IntentExtractor intentExtractor,
@@ -27,7 +31,8 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
             TaskFilterResolver taskFilterResolver,
             ListTasksUseCase listTasksUseCase,
             JsonMapper jsonMapper,
-            String systemInstructions, String answerFormatterInstructions
+            String systemInstructions, String answerFormatterInstructions,
+            Clock clock
     ) {
         if (intentExtractor == null) {
             throw new IllegalArgumentException("IntentExtractor é obrigatório!");
@@ -50,6 +55,9 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
         if (answerFormatterInstructions == null || answerFormatterInstructions.isBlank()) {
             throw new IllegalArgumentException("Instruções do AnswerFormatter são obrigatórias!");
         }
+        if (clock == null) {
+            throw new IllegalArgumentException("Clock é obrigatório!");
+        }
 
         this.intentExtractor = intentExtractor;
         this.answerFormatter = answerFormatter;
@@ -58,6 +66,7 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
         this.jsonMapper = jsonMapper;
         this.systemInstructions = systemInstructions;
         this.answerFormatterInstructions = answerFormatterInstructions;
+        this.clock = clock;
     }
 
     @Override
@@ -99,7 +108,11 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
 
         StringBuilder sb = new StringBuilder();
 
+        sb.append("=== Data atual ===\n\n");
+        sb.append(LocalDate.now(clock)).append("\n\n");
+
         sb.append("=== Histórico ===\n\n");
+        // ... resto do método continua igual
         if (priorMessages.isEmpty()) {
             sb.append("Nenhum.\n\n");
         } else {
@@ -140,10 +153,14 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
     private String describeSuggestion(TaskSuggestion suggestion) {
         return switch (suggestion) {
             case TaskSuggestion.Create s -> """
-                    Ação: CREATE
-                    Título: %s
-                    Prioridade: %s
-                    Categoria: %s""".formatted(s.title(), s.priority(), s.category());
+        Ação: CREATE
+        Título: %s
+        Prioridade: %s
+        Categoria: %s
+        Prazo: %s
+        Lembrete: %s""".formatted(s.title(), s.priority(), s.category(),
+                    s.dueDate() != null ? s.dueDate() : "não definido",
+                    s.reminderDate() != null ? s.reminderDate() : "não definido");
 
             case TaskSuggestion.Update s -> {
                 StringBuilder b = new StringBuilder("Ação: UPDATE\nTarefa alvo: ").append(s.targetTaskId()).append("\n");
@@ -193,18 +210,35 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
 
     private TaskSuggestion toSuggestion(SuggestionData data) {
         UUID id = UUID.randomUUID();
+        LocalDateTime dueDate = parseDateOrNull(data.dueDate());
+        LocalDateTime reminderDate = parseDateOrNull(data.reminderDate());
+
         return switch (data.action()) {
             case "CREATE" -> new TaskSuggestion.Create(id, data.title(), data.description(),
                     EnumParser.parse(TaskPriority.class, data.priority()),
-                    EnumParser.parse(TaskCategory.class, data.category()));
+                    EnumParser.parse(TaskCategory.class, data.category()),
+                    dueDate, reminderDate);
             case "UPDATE" -> new TaskSuggestion.Update(id, data.targetTaskId(), data.title(), data.description(),
                     EnumParser.parse(TaskPriority.class, data.priority()),
-                    EnumParser.parse(TaskCategory.class, data.category()));
+                    EnumParser.parse(TaskCategory.class, data.category()),
+                    dueDate, reminderDate);
             case "DELETE" -> new TaskSuggestion.Delete(id, data.targetTaskId());
             case "START" -> new TaskSuggestion.Start(id, data.targetTaskId());
             case "COMPLETE" -> new TaskSuggestion.Complete(id, data.targetTaskId());
             default -> throw new IllegalStateException("Ação desconhecida: " + data.action());
         };
+    }
+
+    private LocalDateTime parseDateOrNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDateTime.parse(value);
+        } catch (java.time.format.DateTimeParseException e) {
+            System.out.println("Data inválida retornada pela IA, ignorando: " + value);
+            return null;
+        }
     }
 
     private String lastUserMessage(List<Message> history) {
