@@ -46,7 +46,7 @@ public class ListTasksAction implements HttpHandler {
 
             ListTasksUseCase.TaskFilter filter = (status == null && priority == null && category == null)
                     ? null
-                    : new ListTasksUseCase.TaskFilter(status, priority, category, Set.of());
+                    : new ListTasksUseCase.TaskFilter(status, priority, category, Set.of(), null, null);
 
             List<Task> tasks = listTasksUseCase.execute(user.getId(), filter);
 

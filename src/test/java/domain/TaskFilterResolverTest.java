@@ -17,15 +17,15 @@ class TaskFilterResolverTest {
     private final TaskFilterResolver resolver = new TaskFilterResolver();
 
     @Test
-    void intentNulo_devolveFilterNone() {
+    void nullIntent_returnsFilterNone() {
         TaskFilter result = resolver.resolve(null);
 
         assertEquals(TaskFilter.none(), result);
     }
 
     @Test
-    void todosCamposNulos_devolveFilterNone() {
-        TaskFilterIntent intent = new TaskFilterIntent(null, null, null, null);
+    void allFieldsNull_returnsFilterNone() {
+        TaskFilterIntent intent = new TaskFilterIntent(null, null, null, null, null, null);
 
         TaskFilter result = resolver.resolve(intent);
 
@@ -33,8 +33,8 @@ class TaskFilterResolverTest {
     }
 
     @Test
-    void valoresValidos_saoResolvidosCorretamente() {
-        TaskFilterIntent intent = new TaskFilterIntent("PENDING", "HIGH", null, null);
+    void validValues_areResolvedCorrectly() {
+        TaskFilterIntent intent = new TaskFilterIntent("PENDING", "HIGH", null, null, null, null);
 
         TaskFilter result = resolver.resolve(intent);
 
@@ -45,8 +45,8 @@ class TaskFilterResolverTest {
     }
 
     @Test
-    void valorEmMinusculoOuComEspacos_eNormalizado() {
-        TaskFilterIntent intent = new TaskFilterIntent("  pending ", "high", null, null);
+    void lowercaseOrPaddedValue_isNormalized() {
+        TaskFilterIntent intent = new TaskFilterIntent("  pending ", "high", null, null, null, null);
 
         TaskFilter result = resolver.resolve(intent);
 
@@ -55,8 +55,8 @@ class TaskFilterResolverTest {
     }
 
     @Test
-    void valorAlucinado_naoQuebraEViraNull() {
-        TaskFilterIntent intent = new TaskFilterIntent("URGENTE_TOTAL", null, null, null);
+    void hallucinatedValue_doesNotBreakAndBecomesNull() {
+        TaskFilterIntent intent = new TaskFilterIntent("URGENTE_TOTAL", null, null, null, null, null);
 
         TaskFilter result = resolver.resolve(intent);
 
@@ -65,8 +65,8 @@ class TaskFilterResolverTest {
     }
 
     @Test
-    void misturaDeValorValidoEAlucinado_ignoraSoOInvalido() {
-        TaskFilterIntent intent = new TaskFilterIntent("PENDING", "PRIORIDADE_INEXISTENTE", null, null);
+    void mixOfValidAndHallucinatedValue_ignoresOnlyTheInvalidOne() {
+        TaskFilterIntent intent = new TaskFilterIntent("PENDING", "PRIORIDADE_INEXISTENTE", null, null, null, null);
 
         TaskFilter result = resolver.resolve(intent);
 
@@ -75,8 +75,8 @@ class TaskFilterResolverTest {
     }
 
     @Test
-    void excludeStatus_geraExcludedStatusesComUmElemento() {
-        TaskFilterIntent intent = new TaskFilterIntent(null, null, null, "COMPLETED");
+    void excludeStatus_generatesExcludedStatusesWithOneElement() {
+        TaskFilterIntent intent = new TaskFilterIntent(null, null, null, "COMPLETED", null, null);
 
         TaskFilter result = resolver.resolve(intent);
 
@@ -85,8 +85,8 @@ class TaskFilterResolverTest {
     }
 
     @Test
-    void excludeStatusAlucinado_devolveExcludedStatusesVazio() {
-        TaskFilterIntent intent = new TaskFilterIntent(null, null, null, "NAO_EXISTE");
+    void hallucinatedExcludeStatus_returnsEmptyExcludedStatuses() {
+        TaskFilterIntent intent = new TaskFilterIntent(null, null, null, "NAO_EXISTE", null, null);
 
         TaskFilter result = resolver.resolve(intent);
 
@@ -94,12 +94,41 @@ class TaskFilterResolverTest {
     }
 
     @Test
-    void statusEExcludeStatusJuntos_naoSeConflitam_ficamComoVieram() {
-        TaskFilterIntent intent = new TaskFilterIntent("IN_PROGRESS", null, null, "COMPLETED");
+    void statusAndExcludeStatusTogether_doNotConflict_remainAsGiven() {
+        TaskFilterIntent intent = new TaskFilterIntent("IN_PROGRESS", null, null, "COMPLETED", null, null);
 
         TaskFilter result = resolver.resolve(intent);
 
         assertEquals(TaskStatus.IN_PROGRESS, result.status());
         assertEquals(EnumSet.of(TaskStatus.COMPLETED), result.excludedStatuses());
+    }
+
+    @Test
+    void validDueDateRange_isParsedCorrectly() {
+        TaskFilterIntent intent = new TaskFilterIntent(null, null, null, null,
+                "2026-08-05T00:00:00", "2026-08-06T00:00:00");
+
+        TaskFilter result = resolver.resolve(intent);
+
+        assertEquals(java.time.LocalDateTime.parse("2026-08-05T00:00:00"), result.dueDateFrom());
+        assertEquals(java.time.LocalDateTime.parse("2026-08-06T00:00:00"), result.dueDateTo());
+    }
+
+    @Test
+    void invalidDueDate_isIgnoredAndBecomesNull() {
+        TaskFilterIntent intent = new TaskFilterIntent(null, null, null, null, "data-invalida", null);
+
+        TaskFilter result = resolver.resolve(intent);
+
+        assertEquals(null, result.dueDateFrom());
+    }
+
+    @Test
+    void blankDueDate_isTreatedAsNull() {
+        TaskFilterIntent intent = new TaskFilterIntent(null, null, null, null, "   ", null);
+
+        TaskFilter result = resolver.resolve(intent);
+
+        assertEquals(null, result.dueDateFrom());
     }
 }

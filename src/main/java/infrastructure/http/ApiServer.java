@@ -17,10 +17,7 @@ import infrastructure.config.AssistantConfig;
 import infrastructure.http.actions.*;
 import infrastructure.http.json.GsonJsonMapper;
 import infrastructure.http.json.JsonMapper;
-import infrastructure.persistence.InMemoryLoginRateLimiter;
-import infrastructure.persistence.InMemorySessionRepository;
-import infrastructure.persistence.RedisAssistantSessionRepository;
-import infrastructure.persistence.TaskSuggestionAdapter;
+import infrastructure.persistence.*;
 import infrastructure.security.Pbkdf2PasswordHasher;
 import infrastructure.security.UuidTokenGenerator;
 import redis.clients.jedis.JedisPool;
@@ -29,6 +26,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.time.Clock;
+import java.time.LocalDateTime;
 
 public class ApiServer {
 
@@ -36,17 +34,26 @@ public class ApiServer {
     private final ListTasksUseCase listTasksUseCase;
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
+    private final RescheduleNotificationsUseCase rescheduleNotificationsUseCase;
+    private final CancelNotificationsUseCase cancelNotificationsUseCase;
+    private final ListNotificationsUseCase listNotificationsUseCase;
 
     public ApiServer(
             CreateTaskUseCase createTaskUseCase,
             ListTasksUseCase listTasksUseCase,
             UserRepository userRepository,
-            TaskRepository taskRepository
+            TaskRepository taskRepository,
+            RescheduleNotificationsUseCase rescheduleNotificationsUseCase,
+            CancelNotificationsUseCase cancelNotificationsUseCase,
+            ListNotificationsUseCase listNotificationsUseCase
     ) {
         this.createTaskUseCase = createTaskUseCase;
         this.listTasksUseCase = listTasksUseCase;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
+        this.rescheduleNotificationsUseCase = rescheduleNotificationsUseCase;
+        this.cancelNotificationsUseCase = cancelNotificationsUseCase;
+        this.listNotificationsUseCase = listNotificationsUseCase;
     }
 
     private static String loadInstructions(String resourcePath) {
@@ -140,20 +147,23 @@ public class ApiServer {
                 new ListTasksAction(listTasksUseCase, jsonMapper, userRepository, sessionRepository);
 
         UpdateTaskDetailsUseCase updateTaskUseCase =
-                new UpdateTaskDetailsUseCase(taskRepository, Clock.systemDefaultZone());
+                new UpdateTaskDetailsUseCase(taskRepository, Clock.systemDefaultZone(), rescheduleNotificationsUseCase);
 
         UpdateTaskAction updateAction =
                 new UpdateTaskAction(updateTaskUseCase, jsonMapper, userRepository, sessionRepository);
 
         DeleteTaskUseCase deleteTaskUseCase =
-                new DeleteTaskUseCase(taskRepository);
+                new DeleteTaskUseCase(taskRepository, cancelNotificationsUseCase);
 
         DeleteTaskAction deleteAction =
                 new DeleteTaskAction(deleteTaskUseCase, userRepository, sessionRepository);
 
+        ListNotificationsAction listNotificationsAction =
+                new ListNotificationsAction(listNotificationsUseCase, taskRepository, jsonMapper, userRepository, sessionRepository);
+
         server.createContext(
                 "/tasks",
-                new TasksHandler(createAction, listAction, updateAction, deleteAction)
+                new TasksHandler(createAction, listAction, updateAction, deleteAction, listNotificationsAction)
         );
 
         // 5
@@ -174,6 +184,7 @@ public class ApiServer {
         // 6
         Gson assistantGson = new GsonBuilder()
                 .registerTypeAdapter(TaskSuggestion.class, new TaskSuggestionAdapter())
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                 .create();
 
         JedisPool jedisPool = new JedisPool("localhost", 6379);
@@ -188,7 +199,7 @@ public class ApiServer {
                 );
 
         StartTaskUseCase startTaskUseCase = new StartTaskUseCase(taskRepository);
-        CompleteTaskUseCase completeTaskUseCase = new CompleteTaskUseCase(taskRepository);
+        CompleteTaskUseCase completeTaskUseCase = new CompleteTaskUseCase(taskRepository, cancelNotificationsUseCase);
 
         ConfirmTaskSuggestionUseCase confirmTaskSuggestionUseCase =
                 new ConfirmTaskSuggestionUseCase(

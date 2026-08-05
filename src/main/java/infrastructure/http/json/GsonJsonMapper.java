@@ -1,9 +1,15 @@
 package infrastructure.http.json;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import infrastructure.persistence.LocalDateTimeTypeAdapter;
+
+import java.time.LocalDateTime;
 
 public class GsonJsonMapper implements JsonMapper {
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
+            .create();
 
     @Override
     public String toJson(Object object) {

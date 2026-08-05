@@ -7,13 +7,22 @@ import domain.exceptions.TaskNotFoundException;
 
 public class CompleteTaskUseCase {
     private final TaskRepository repo;
+    private final CancelNotificationsUseCase cancelNotificationsUseCase;
 
-    public CompleteTaskUseCase(TaskRepository repo) { this.repo = repo; }
+    public CompleteTaskUseCase(TaskRepository repo, CancelNotificationsUseCase cancelNotificationsUseCase) {
+        this.repo = repo;
+        this.cancelNotificationsUseCase = cancelNotificationsUseCase;
+    }
 
     public Task execute(String taskId, User loggedUser) {
         Task task = repo.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
         task.verifyOwnership(loggedUser.getId());
         task.completeTask();
-        return repo.save(task);
+
+        Task savedTask = repo.save(task);
+
+        cancelNotificationsUseCase.execute(taskId);
+
+        return savedTask;
     }
 }

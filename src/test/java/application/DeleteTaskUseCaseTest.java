@@ -1,11 +1,15 @@
 package application;
 
 import domain.model.Task;
+import infrastructure.persistence.InMemoryNotificationRepository;
 import infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DeleteTaskUseCaseTest {
+
+    InMemoryNotificationRepository notificationRepository = new InMemoryNotificationRepository();
+    CancelNotificationsUseCase cancelNotificationsUseCase = new CancelNotificationsUseCase(notificationRepository);
 
     @Test
     void shouldDeleteTask(){
@@ -15,7 +19,7 @@ public class DeleteTaskUseCaseTest {
         repo.save(existingTask);
         String existingId = existingTask.getId();
 
-        DeleteTaskUseCase useCase = new DeleteTaskUseCase(repo);
+        DeleteTaskUseCase useCase = new DeleteTaskUseCase(repo, cancelNotificationsUseCase);
 
         // Act
         useCase.execute(existingId, "owner-123");

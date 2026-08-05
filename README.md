@@ -325,6 +325,48 @@ Throughout the project, every feature follows these principles:
 
 ---
 
+# Phase 7 — Due dates and notification workflow
+
+## Task due dates
+
+* Task due date support
+* Natural language date parsing for the AI assistant
+* Due date update through application use cases
+* Automatic notification rescheduling after due date changes
+
+## Notification domain
+
+* Notification entity
+* NotificationType
+* NotificationStatus
+* NotificationRepository
+* InMemoryNotificationRepository
+* NotificationScheduleCalculator
+
+## Notification workflow
+
+* NotificationSender strategy
+* ConsoleNotificationSender
+* CreateNotificationUseCase
+* RescheduleNotificationsUseCase
+* CancelNotificationsUseCase
+* SendNotificationUseCase
+* ListNotificationsUseCase
+* Automatic notification scheduling
+* Daily overdue notification chain until task completion
+* Full integration with the task lifecycle
+
+--- 
+
+## API
+
+* GET `/tasks/{id}/notifications`
+
+## Testing
+
+* Unit tests covering notification scheduling and lifecycle
+* End-to-end validation through Postman
+
 # Architecture
 
 ---
@@ -401,16 +443,18 @@ The domain layer has no dependency on:
 
 # Roadmap
 
-| Phase        | Status | Scope                                |
-|--------------|--------| ------------------------------------ |
-| 1            | Done   | Task creation                        |
-| 2            | Done   | Update, delete, tests                |
-| 3            | Done   | Categories, priorities, Builder      |
-| 4            | Done   | Users, authentication, authorization |
-| 5            | Done   | MySQL, REST API, HTTP adapters       |
-| 6            | Done   | AI assistant workflow, conversational memory and task operations |
-| 7 |   In Progress     | Notifications                                |
-| 8            |        | Migration to Spring Boot                     |
+| Phase | Status      | Scope                                |
+|------|-------------| ------------------------------------ |
+| 1    | Done        | Task creation                        |
+| 2    | Done        | Update, delete, tests                |
+| 3    | Done        | Categories, priorities, Builder      |
+| 4    | Done        | Users, authentication, authorization |
+| 5    | Done        | MySQL, REST API, HTTP adapters       |
+| 6    | Done        | AI assistant workflow, conversational memory and task operations |
+| 7    | Done        | Due dates and notification workflow |                              |
+| 8    | In Progress | Migration to Spring Boot                     
+| 9    |  | Frontend application                     |
+| 10   |  | Deployment                  |
 ----------------------------------------------------------
 
 

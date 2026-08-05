@@ -13,10 +13,13 @@ import java.time.LocalDateTime;
 public class CreateTaskUseCase {
     private final TaskRepository repo;
     private final Clock clock;
+    private final CreateNotificationUseCase createNotificationUseCase;
 
-    public CreateTaskUseCase(TaskRepository repo, Clock clock){
+    public CreateTaskUseCase(TaskRepository repo, Clock clock,
+                             CreateNotificationUseCase createNotificationUseCase) {
         this.repo = repo;
         this.clock = clock;
+        this.createNotificationUseCase = createNotificationUseCase;
     }
 
     public Task execute(String title, String description, User loggedUser, TaskPriority priority, TaskCategory category, LocalDateTime dueDate, LocalDateTime reminderDate){
@@ -37,6 +40,10 @@ public class CreateTaskUseCase {
             task.updateCategory(category);
         }
 
-        return repo.save(task);
+        Task savedTask = repo.save(task);
+
+        createNotificationUseCase.execute(savedTask);
+
+        return savedTask;
     }
 }

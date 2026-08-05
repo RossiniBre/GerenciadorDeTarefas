@@ -5,6 +5,8 @@ import domain.model.TaskPriority;
 import domain.model.TaskCategory;
 import domain.model.TaskStatus;
 import domain.model.User;
+import domain.notification.NotificationScheduleCalculator;
+import infrastructure.persistence.InMemoryNotificationRepository;
 import infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +24,13 @@ class CreateTaskUseCaseTest {
         // Arrange
         InMemoryTaskRepository repo = new InMemoryTaskRepository();
         Clock fixedClock = Clock.fixed(Instant.parse("2026-08-04T10:00:00Z"), ZoneOffset.UTC);
-        CreateTaskUseCase useCase = new CreateTaskUseCase(repo, fixedClock);
+
+        InMemoryNotificationRepository notificationRepository = new InMemoryNotificationRepository();
+        NotificationScheduleCalculator scheduleCalculator = new NotificationScheduleCalculator(fixedClock);
+        CreateNotificationUseCase createNotificationUseCase =
+                new CreateNotificationUseCase(notificationRepository, scheduleCalculator);
+
+        CreateTaskUseCase useCase = new CreateTaskUseCase(repo, fixedClock, createNotificationUseCase);
         User owner = User.newUser("owner-123", "hash-fake-123");
 
         LocalDateTime dueDate = LocalDateTime.of(2026, 8, 10, 18, 0);

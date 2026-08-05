@@ -13,6 +13,8 @@ import infrastructure.persistence.InMemoryAssistantSessionRepository;
 import infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import domain.notification.NotificationScheduleCalculator;
+import infrastructure.persistence.InMemoryNotificationRepository;
 
 import java.time.Clock;
 import java.util.List;
@@ -36,11 +38,20 @@ class ConfirmTaskSuggestionUseCaseTest {
 
         Clock clock = Clock.systemDefaultZone();
 
-        CreateTaskUseCase createTaskUseCase = new CreateTaskUseCase(taskRepository, clock);
-        UpdateTaskDetailsUseCase updateTaskDetailsUseCase = new UpdateTaskDetailsUseCase(taskRepository, clock);
-        DeleteTaskUseCase deleteTaskUseCase = new DeleteTaskUseCase(taskRepository);
+        InMemoryNotificationRepository notificationRepository = new InMemoryNotificationRepository();
+        NotificationScheduleCalculator scheduleCalculator = new NotificationScheduleCalculator(clock);
+        CreateNotificationUseCase createNotificationUseCase =
+                new CreateNotificationUseCase(notificationRepository, scheduleCalculator);
+        RescheduleNotificationsUseCase rescheduleNotificationsUseCase =
+                new RescheduleNotificationsUseCase(notificationRepository, createNotificationUseCase);
+        CancelNotificationsUseCase cancelNotificationsUseCase =
+                new CancelNotificationsUseCase(notificationRepository);
+
+        CreateTaskUseCase createTaskUseCase = new CreateTaskUseCase(taskRepository, clock, createNotificationUseCase);
+        UpdateTaskDetailsUseCase updateTaskDetailsUseCase = new UpdateTaskDetailsUseCase(taskRepository, clock, rescheduleNotificationsUseCase);
+        DeleteTaskUseCase deleteTaskUseCase = new DeleteTaskUseCase(taskRepository, cancelNotificationsUseCase);
         StartTaskUseCase startTaskUseCase = new StartTaskUseCase(taskRepository);
-        CompleteTaskUseCase completeTaskUseCase = new CompleteTaskUseCase(taskRepository);
+        CompleteTaskUseCase completeTaskUseCase = new CompleteTaskUseCase(taskRepository, cancelNotificationsUseCase);
 
         useCase = new ConfirmTaskSuggestionUseCase(
                 sessionRepository,

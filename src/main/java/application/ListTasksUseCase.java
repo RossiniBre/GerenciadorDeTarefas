@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.time.LocalDateTime;
 
 public class ListTasksUseCase {
 
@@ -33,6 +34,8 @@ public class ListTasksUseCase {
                 .filter(task -> appliedFilter.priority() == null || task.getPriority() == appliedFilter.priority())
                 .filter(task -> appliedFilter.category() == null || task.getCategory() == appliedFilter.category())
                 .filter(task -> !appliedFilter.excludedStatuses().contains(task.getStatus()))
+                .filter(task -> appliedFilter.dueDateFrom() == null || (task.getDueDate() != null && !task.getDueDate().isBefore(appliedFilter.dueDateFrom())))
+                .filter(task -> appliedFilter.dueDateTo() == null || (task.getDueDate() != null && task.getDueDate().isBefore(appliedFilter.dueDateTo())))
                 .sorted(Comparator.comparing(Task::getPriority).reversed())
                 .toList();
     }
@@ -41,7 +44,9 @@ public class ListTasksUseCase {
             TaskStatus status,
             TaskPriority priority,
             TaskCategory category,
-            Set<TaskStatus> excludedStatuses
+            Set<TaskStatus> excludedStatuses,
+            LocalDateTime dueDateFrom,
+            LocalDateTime dueDateTo
     ) {
 
         public TaskFilter {
@@ -49,23 +54,27 @@ public class ListTasksUseCase {
         }
 
         public static TaskFilter none() {
-            return new TaskFilter(null, null, null, Set.of());
+            return new TaskFilter(null, null, null, Set.of(), null, null);
         }
 
         public static TaskFilter byStatus(TaskStatus status) {
-            return new TaskFilter(status, null, null, Set.of());
+            return new TaskFilter(status, null, null, Set.of(), null, null);
         }
 
         public static TaskFilter byPriority(TaskPriority priority) {
-            return new TaskFilter(null, priority, null, Set.of());
+            return new TaskFilter(null, priority, null, Set.of(), null, null);
         }
 
         public static TaskFilter byCategory(TaskCategory category) {
-            return new TaskFilter(null, null, category, Set.of());
+            return new TaskFilter(null, null, category, Set.of(), null, null);
         }
 
         public static TaskFilter excludingStatus(TaskStatus status) {
-            return new TaskFilter(null, null, null, EnumSet.of(status));
+            return new TaskFilter(null, null, null, EnumSet.of(status), null, null);
+        }
+
+        public static TaskFilter byDueDateRange(LocalDateTime from, LocalDateTime to) {
+            return new TaskFilter(null, null, null, Set.of(), from, to);
         }
     }
 }

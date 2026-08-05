@@ -1,6 +1,8 @@
 package application;
 
 import domain.model.Task;
+import domain.notification.NotificationScheduleCalculator;
+import infrastructure.persistence.InMemoryNotificationRepository;
 import infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UpdateTaskDetailsUseCaseTest {
 
+    InMemoryNotificationRepository notificationRepository = new InMemoryNotificationRepository();
+    CancelNotificationsUseCase cancelNotificationsUseCase = new CancelNotificationsUseCase(notificationRepository);
+
     @Test
     void shouldUpdateTitleAndDescription() {
         // Arrange
@@ -22,8 +27,14 @@ class UpdateTaskDetailsUseCaseTest {
         String existingId = existingTask.getId();
 
         Clock fixedClock = Clock.fixed(Instant.parse("2026-08-04T10:00:00Z"), ZoneOffset.UTC);
-        UpdateTaskDetailsUseCase useCase = new UpdateTaskDetailsUseCase(repo, fixedClock);
 
+        NotificationScheduleCalculator scheduleCalculator = new NotificationScheduleCalculator(fixedClock);
+        CreateNotificationUseCase createNotificationUseCase =
+                new CreateNotificationUseCase(notificationRepository, scheduleCalculator);
+        RescheduleNotificationsUseCase rescheduleNotificationsUseCase =
+                new RescheduleNotificationsUseCase(notificationRepository, createNotificationUseCase);
+
+        UpdateTaskDetailsUseCase useCase = new UpdateTaskDetailsUseCase(repo, fixedClock, rescheduleNotificationsUseCase);
         LocalDateTime dueDate = LocalDateTime.of(2026, 8, 20, 18, 0);
         LocalDateTime reminderDate = LocalDateTime.of(2026, 8, 19, 9, 0);
 

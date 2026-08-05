@@ -9,14 +9,18 @@ import domain.exceptions.InvalidFieldException;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class UpdateTaskDetailsUseCase {
     private final TaskRepository repo;
     private final Clock clock;
+    private final RescheduleNotificationsUseCase rescheduleNotificationsUseCase;
 
-    public UpdateTaskDetailsUseCase(TaskRepository repo, Clock clock) {
+    public UpdateTaskDetailsUseCase(TaskRepository repo, Clock clock,
+                                    RescheduleNotificationsUseCase rescheduleNotificationsUseCase) {
         this.repo = repo;
         this.clock = clock;
+        this.rescheduleNotificationsUseCase = rescheduleNotificationsUseCase;
     }
 
     public Task execute(String title, String description, TaskPriority priority, TaskCategory category, LocalDateTime dueDate, LocalDateTime reminderDate, String id, String requesterId) {
@@ -24,6 +28,9 @@ public class UpdateTaskDetailsUseCase {
         task.verifyOwnership(requesterId);
 
         LocalDateTime now = LocalDateTime.now(clock);
+
+        LocalDateTime oldDueDate = task.getDueDate();
+        TaskPriority oldPriority = task.getPriority();
 
         if (title != null) task.updateTitle(title);
         if (description != null) task.updateDescription(description);
@@ -38,6 +45,15 @@ public class UpdateTaskDetailsUseCase {
             task.updateReminderDate(reminderDate);
         }
 
-        return repo.save(task);
+        Task updatedTask = repo.save(task);
+
+        boolean dueDateChanged = !Objects.equals(oldDueDate, updatedTask.getDueDate());
+        boolean priorityChanged = !Objects.equals(oldPriority, updatedTask.getPriority());
+
+        if (dueDateChanged || priorityChanged) {
+            rescheduleNotificationsUseCase.execute(updatedTask);
+        }
+
+        return updatedTask;
     }
 }

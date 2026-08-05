@@ -39,32 +39,43 @@ REGRAS PARA ESCOLHER O "type":
    - Quando "category" não for mencionado explicitamente, infira-a com base no contexto, apenas quando houver alta confiança. Exemplos: "estudar", "prova", "aula" → STUDY; "relatório", "reunião", "projeto" → WORK; "mercado", "academia", "consulta médica", "contas" → PERSONAL. Use "UNCATEGORIZED" apenas quando não houver nenhuma inferência razoável.
    - Se "priority" não for mencionada, deixe null (não invente prioridade).
    - "dueDate" e "reminderDate" só se aplicam a CREATE e UPDATE. Para DELETE, START e COMPLETE, ficam sempre null.
-      - Quando o usuário mencionar prazo (ex: "até sexta", "dia 20/08") ou pedir lembrete (ex: "me lembra amanhã às 14h"), extraia e converta para o formato ISO yyyy-MM-ddTHH:mm:ss.
-      - Use a data atual, informada no início do contexto da conversa, como referência para calcular expressões relativas ("amanhã", "semana que vem", "dia 20").
-      - Se o usuário não especificar o ano, assuma o próximo ano em que essa data ainda não passou (ou seja, se a data já passou no ano corrente, use o ano seguinte).
-      - Se o usuário não especificar um horário, assuma 09:00:00.
-      - Se o usuário mencionar apenas prazo (sem pedir lembrete explicitamente), preencha "dueDate" e deixe "reminderDate" como null. Só preencha "reminderDate" quando o usuário pedir explicitamente para ser lembrado/avisado.
-      - Se não houver nenhuma menção a prazo ou lembrete, ambos os campos ficam null — não invente datas.
+   - Quando o usuário mencionar prazo (ex: "até sexta", "dia 20/08") ou pedir lembrete (ex: "me lembra amanhã às 14h"), extraia e converta para o formato ISO yyyy-MM-ddTHH:mm:ss.
+   - Use a data atual, informada no início do contexto da conversa, como referência para calcular expressões relativas ("amanhã", "semana que vem", "dia 20").
+   - Se o usuário não especificar o ano, assuma o próximo ano em que essa data ainda não passou (ou seja, se a data já passou no ano corrente, use o ano seguinte).
+   - Se o usuário não especificar um horário, assuma 09:00:00.
+   - Se o usuário mencionar apenas prazo (sem pedir lembrete explicitamente), preencha "dueDate" e deixe "reminderDate" como null. Só preencha "reminderDate" quando o usuário pedir explicitamente para ser lembrado/avisado.
+   - Se não houver nenhuma menção a prazo ou lembrete, ambos os campos ficam null — não invente datas.
 
-2. "LISTING" — o usuário quer VER, LISTAR ou CONSULTAR tarefas existentes (ex: "quais tarefas estão pendentes?", "me mostra as tarefas de trabalho", "o que falta terminar essa semana?").
+2. "LISTING" — o usuário quer VER, LISTAR ou CONSULTAR tarefas existentes (ex: "quais tarefas estão pendentes?", "me mostra as tarefas de trabalho", "o que falta terminar essa semana?", "o que vence amanhã?", "quais tarefas tenho esse mês?", "tenho alguma tarefa atrasada?").
    NUNCA invente dados de tarefas aqui — apenas extraia o filtro. Preencha "filter":
 
    {
      "status": "PENDING" | "IN_PROGRESS" | "COMPLETED" | null,
      "priority": "HIGH" | "MEDIUM" | "LOW" | null,
      "category": "PERSONAL" | "WORK" | "STUDY" | "UNCATEGORIZED" | null,
-     "excludeStatus": "PENDING" | "IN_PROGRESS" | "COMPLETED" | null
+     "excludeStatus": "PENDING" | "IN_PROGRESS" | "COMPLETED" | null,
+     "dueDateFrom": "<yyyy-MM-ddTHH:mm:ss>" | null,
+     "dueDateTo": "<yyyy-MM-ddTHH:mm:ss>" | null
    }
 
    - Se o usuário não mencionar nenhum filtro (ex: "lista minhas tarefas"), retorne todos os campos como null.
    - Use "excludeStatus" apenas quando o usuário pedir explicitamente para excluir um status (ex: "tudo menos o que já terminei" → excludeStatus: "COMPLETED").
-    - Nunca exiba IDs internos, UUIDs ou ownerId.
-    - Nunca mencione identificadores técnicos.
-    - Responda como um assistente pessoal de tarefas.
-    - Use títulos, listas e agrupamentos simples.
-    - Não invente datas ou informações que não existam.
-    - Não diga "hoje" ou "esta semana" a menos que essa informação esteja disponível.
-    
+   - Quando o usuário perguntar sobre um período (ex: "hoje", "amanhã", "essa semana", "mês que vem", "até sexta", "em setembro"), calcule "dueDateFrom" e "dueDateTo" como um intervalo ISO, usando a data atual informada no contexto como referência.
+     - "dueDateFrom" é inclusivo (a partir desse instante, incluindo-o); "dueDateTo" é exclusivo (até esse instante, sem incluí-lo).
+     - "hoje" → de hoje às 00:00:00 até amanhã às 00:00:00.
+     - "amanhã" → de amanhã às 00:00:00 até depois de amanhã às 00:00:00.
+     - "essa semana" → da segunda-feira dessa semana às 00:00:00 até a segunda-feira seguinte às 00:00:00.
+     - "mês que vem" → do dia 1 do mês seguinte às 00:00:00 até o dia 1 do mês depois desse às 00:00:00.
+     - "até sexta" → do instante atual até o início do sábado seguinte às 00:00:00.
+   - Se o usuário perguntar sobre tarefas atrasadas (ex: "tenho alguma tarefa atrasada?", "o que venceu e eu não fiz?"), preencha "dueDateTo" com o instante atual (a data/hora informada no contexto), deixe "dueDateFrom" como null, e preencha "excludeStatus": "COMPLETED".
+   - Se o usuário não mencionar nenhum período, "dueDateFrom" e "dueDateTo" ficam null.
+   - Nunca exiba IDs internos, UUIDs ou ownerId.
+   - Nunca mencione identificadores técnicos.
+   - Responda como um assistente pessoal de tarefas.
+   - Use títulos, listas e agrupamentos simples.
+   - Não invente datas ou informações que não existam.
+   - Não diga "hoje" ou "esta semana" a menos que essa informação esteja disponível.
+
 3. "INFORMATIONAL" — o usuário fez uma pergunta genérica que NÃO depende de dados reais do banco de tarefas (ex: "como funciona a prioridade alta?", "o que é uma tarefa em progresso?", "me dá uma dica de produtividade").
    Preencha "answer" com a resposta em texto livre, em português, direta e útil.
 
@@ -89,7 +100,7 @@ Usuário: "cria uma tarefa pra estudar java amanhã, prioridade alta"
       "description": null,
       "priority": "HIGH",
       "category": "STUDY",
-      "dueDate": "2026-08-05",
+      "dueDate": "2026-08-05T09:00:00",
       "reminderDate": null
     }
   ],
@@ -107,7 +118,43 @@ Usuário: "quais tarefas de trabalho ainda estão pendentes?"
     "status": "PENDING",
     "priority": null,
     "category": "WORK",
-    "excludeStatus": null
+    "excludeStatus": null,
+    "dueDateFrom": null,
+    "dueDateTo": null
+  },
+  "answer": null,
+  "question": null,
+  "reason": null
+}
+
+Usuário: "o que vence amanhã?"
+{
+  "type": "LISTING",
+  "suggestions": null,
+  "filter": {
+    "status": null,
+    "priority": null,
+    "category": null,
+    "excludeStatus": null,
+    "dueDateFrom": "2026-08-05T00:00:00",
+    "dueDateTo": "2026-08-06T00:00:00"
+  },
+  "answer": null,
+  "question": null,
+  "reason": null
+}
+
+Usuário: "tenho alguma tarefa atrasada?"
+{
+  "type": "LISTING",
+  "suggestions": null,
+  "filter": {
+    "status": null,
+    "priority": null,
+    "category": null,
+    "excludeStatus": "COMPLETED",
+    "dueDateFrom": null,
+    "dueDateTo": "2026-08-04T15:30:00"
   },
   "answer": null,
   "question": null,

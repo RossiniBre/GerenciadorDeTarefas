@@ -56,6 +56,7 @@ public class SendMessageAssistantAction implements HttpHandler {
         } catch (DomainException e) {
             HttpJson.sendResponse(exchange, 400, "{\"error\":\"" + e.getMessage() + "\"}");
         } catch (Exception e) {
+            e.printStackTrace();
             HttpJson.sendResponse(exchange, 500, "{\"error\":\"Internal server error\"}");
         }
     }
