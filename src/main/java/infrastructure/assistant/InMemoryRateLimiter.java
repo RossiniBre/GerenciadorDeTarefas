@@ -4,6 +4,7 @@ import domain.assistant.RateLimiter;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,6 +37,11 @@ public class InMemoryRateLimiter implements RateLimiter {
 
         counter.incrementAndGet();
         return true;
+    }
+
+    @Override
+    public LocalDateTime nextResetAt() {
+        return currentDay.plusDays(1).atStartOfDay();
     }
 
     private void resetIfNewDay() {

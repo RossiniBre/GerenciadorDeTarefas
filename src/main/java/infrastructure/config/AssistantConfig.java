@@ -4,6 +4,9 @@ import domain.exceptions.InvalidFieldException;
 
 public class AssistantConfig {
 
+    public static final String MODEL = "openrouter/free";;
+    public static final int DAILY_LIMIT = 50;
+
     private final String apiKey;
 
     public AssistantConfig(String apiKey) {
@@ -12,9 +15,7 @@ public class AssistantConfig {
 
     public static AssistantConfig load() {
         String apiKey = System.getenv("ASSISTANT_API_KEY");
-
         validateNotNull(apiKey);
-
         return new AssistantConfig(apiKey);
     }
 

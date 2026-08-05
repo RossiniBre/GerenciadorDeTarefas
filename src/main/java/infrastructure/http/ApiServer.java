@@ -84,7 +84,7 @@ public class ApiServer {
 
         // 2
         RateLimiter assistantRateLimiter =
-                new InMemoryRateLimiter(150, Clock.systemDefaultZone());
+                new InMemoryRateLimiter(AssistantConfig.DAILY_LIMIT, Clock.systemDefaultZone());
 
         IntentExtractor intentExtractor =
                 new RateLimitedIntentExtractor(

@@ -2,12 +2,12 @@ package infrastructure.assistant;
 
 import java.time.LocalDateTime;
 
-public class DailyQuotaExceededException extends RuntimeException {
+public class AssistantRateLimitExceededException extends AssistantRequestFailedException {
 
     private final LocalDateTime resetsAt;
 
-    public DailyQuotaExceededException(LocalDateTime resetsAt) {
-        super("Cota diária do assistente esgotada. Libera em: " + resetsAt);
+    public AssistantRateLimitExceededException(String message, LocalDateTime resetsAt) {
+        super(message);
         this.resetsAt = resetsAt;
     }
 

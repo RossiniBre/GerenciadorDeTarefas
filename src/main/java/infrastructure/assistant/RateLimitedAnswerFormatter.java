@@ -2,6 +2,9 @@ package infrastructure.assistant;
 
 import domain.assistant.AnswerFormatter;
 import domain.assistant.RateLimiter;
+import infrastructure.config.AssistantConfig;
+
+import java.time.LocalDateTime;
 
 public class RateLimitedAnswerFormatter implements AnswerFormatter {
 
@@ -15,8 +18,8 @@ public class RateLimitedAnswerFormatter implements AnswerFormatter {
 
     @Override
     public String format(String instructions, String data) {
-        if (!rateLimiter.tryConsume(RateLimitKeys.GLOBAL)) {
-            throw new DailyQuotaExceededException();
+        if (!rateLimiter.tryConsume(AssistantConfig.MODEL)) {
+            throw new DailyQuotaExceededException(rateLimiter.nextResetAt());
         }
 
         return delegate.format(instructions, data);

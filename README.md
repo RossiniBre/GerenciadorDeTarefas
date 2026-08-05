@@ -378,7 +378,8 @@ src/main/java
 │   ├── repository
 │   ├── assistant
 │   ├── exceptions
-│   └── security
+│   ├── security
+│   └── notifications
 │
 ├── application
 │   └── usecases

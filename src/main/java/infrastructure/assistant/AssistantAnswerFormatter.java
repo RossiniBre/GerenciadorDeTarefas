@@ -1,6 +1,7 @@
 package infrastructure.assistant;
 
 import domain.assistant.AnswerFormatter;
+import infrastructure.config.AssistantConfig;
 import infrastructure.http.json.JsonMapper;
 
 import java.net.URI;
@@ -8,6 +9,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +39,7 @@ public class AssistantAnswerFormatter implements AnswerFormatter {
         String prompt = instructions + "\n\nDados: " + data;
 
         Map<String, Object> body = Map.of(
-                "model", "openrouter/free",
+                "model", AssistantConfig.MODEL,
                 "messages", List.of(
                         Map.of(
                                 "role", "user",
@@ -58,6 +62,10 @@ public class AssistantAnswerFormatter implements AnswerFormatter {
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
+            if (response.statusCode() == 429) {
+                throw buildRateLimitException(response.body());
+            }
+
             if (response.statusCode() != 200) {
                 throw new AssistantRequestFailedException(
                         "ASSISTANT retornou status " + response.statusCode() + ": " + response.body());
@@ -68,6 +76,29 @@ public class AssistantAnswerFormatter implements AnswerFormatter {
         } catch (java.io.IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new AssistantRequestFailedException("Falha ao chamar ASSISTANT API", e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private AssistantRateLimitExceededException buildRateLimitException(String rawJson) {
+        try {
+            Map<String, Object> parsed = jsonMapper.fromJson(rawJson, Map.class);
+            Map<String, Object> error = (Map<String, Object>) parsed.get("error");
+            Map<String, Object> metadata = (Map<String, Object>) error.get("metadata");
+            Map<String, Object> headers = (Map<String, Object>) metadata.get("headers");
+            String resetMillisString = (String) headers.get("X-RateLimit-Reset");
+
+            long resetMillis = Long.parseLong(resetMillisString);
+            LocalDateTime resetsAt = Instant.ofEpochMilli(resetMillis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
+
+            return new AssistantRateLimitExceededException(
+                    "Limite de requisições do provedor atingido", resetsAt);
+
+        } catch (Exception parseError) {
+            return new AssistantRateLimitExceededException(
+                    "Limite de requisições do provedor atingido", null);
         }
     }
 

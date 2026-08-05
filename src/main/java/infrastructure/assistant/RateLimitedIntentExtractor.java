@@ -2,6 +2,9 @@ package infrastructure.assistant;
 
 import domain.assistant.IntentExtractor;
 import domain.assistant.RateLimiter;
+import infrastructure.config.AssistantConfig;
+
+import java.time.LocalDateTime;
 
 public class RateLimitedIntentExtractor implements IntentExtractor {
     
@@ -15,8 +18,8 @@ public class RateLimitedIntentExtractor implements IntentExtractor {
 
     @Override
     public String extract(String instructions, String userMessage) {
-        if (!rateLimiter.tryConsume(RateLimitKeys.GLOBAL)) {
-            throw new DailyQuotaExceededException();
+        if (!rateLimiter.tryConsume(AssistantConfig.MODEL)) {
+            throw new DailyQuotaExceededException(rateLimiter.nextResetAt());
         }
 
         return delegate.extract(instructions, userMessage);
