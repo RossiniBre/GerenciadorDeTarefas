@@ -1,9 +1,10 @@
 package application;
 
-import domain.model.Task;
-import domain.model.TaskStatus;
-import domain.model.User;
-import infrastructure.persistence.InMemoryTaskRepository;
+import com.taskmanager.application.StartTaskUseCase;
+import com.taskmanager.domain.model.Task;
+import com.taskmanager.domain.model.TaskStatus;
+import com.taskmanager.domain.model.User;
+import com.taskmanager.infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

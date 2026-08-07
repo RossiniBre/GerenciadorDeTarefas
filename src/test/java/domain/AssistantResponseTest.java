@@ -1,8 +1,8 @@
 package domain;
 
-import domain.assistant.*;
-import domain.model.TaskCategory;
-import domain.model.TaskPriority;
+import com.taskmanager.domain.assistant.*;
+import com.taskmanager.domain.model.TaskCategory;
+import com.taskmanager.domain.model.TaskPriority;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

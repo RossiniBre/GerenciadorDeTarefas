@@ -1,10 +1,10 @@
 package domain;
 
-import application.ListTasksUseCase.TaskFilter;
-import domain.assistant.TaskFilterIntent;
-import domain.assistant.TaskFilterResolver;
-import domain.model.TaskPriority;
-import domain.model.TaskStatus;
+import com.taskmanager.application.ListTasksUseCase.TaskFilter;
+import com.taskmanager.domain.assistant.TaskFilterIntent;
+import com.taskmanager.domain.assistant.TaskFilterResolver;
+import com.taskmanager.domain.model.TaskPriority;
+import com.taskmanager.domain.model.TaskStatus;
 import org.junit.jupiter.api.Test;
 
 import java.util.EnumSet;

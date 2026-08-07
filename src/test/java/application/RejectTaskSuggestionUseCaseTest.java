@@ -1,10 +1,10 @@
 package application.usecases;
 
-import application.RejectTaskSuggestionUseCase;
-import domain.assistant.AssistantSession;
-import domain.assistant.TaskSuggestion;
-import domain.repositories.AssistantSessionRepository;
-import infrastructure.persistence.InMemoryAssistantSessionRepository;
+import com.taskmanager.application.RejectTaskSuggestionUseCase;
+import com.taskmanager.domain.assistant.AssistantSession;
+import com.taskmanager.domain.assistant.TaskSuggestion;
+import com.taskmanager.domain.repositories.AssistantSessionRepository;
+import com.taskmanager.infrastructure.persistence.InMemoryAssistantSessionRepository;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

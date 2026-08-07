@@ -1,7 +1,7 @@
 package domain;
 
-import domain.model.*;
-import domain.exceptions.InvalidFieldException;
+import com.taskmanager.domain.model.*;
+import com.taskmanager.domain.exceptions.InvalidFieldException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

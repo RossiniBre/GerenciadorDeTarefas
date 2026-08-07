@@ -1,8 +1,8 @@
 package infrastructure;
 
-import domain.model.Task;
-import domain.model.TaskBuilder;
-import infrastructure.persistence.InMemoryTaskRepository;
+import com.taskmanager.domain.model.Task;
+import com.taskmanager.domain.model.TaskBuilder;
+import com.taskmanager.infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

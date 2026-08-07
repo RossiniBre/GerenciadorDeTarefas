@@ -1,0 +1,10 @@
+package com.taskmanager.infrastructure.http.dto;
+
+public class UpdateTaskRequest {
+    public String title;
+    public String description;
+    public String priority;
+    public String category;
+    public String dueDate;
+    public String reminderDate;
+}

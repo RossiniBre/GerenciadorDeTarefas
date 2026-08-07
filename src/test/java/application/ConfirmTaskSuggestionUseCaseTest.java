@@ -1,20 +1,21 @@
 package application;
 
-import domain.assistant.AssistantSession;
-import domain.assistant.TaskSuggestion;
-import domain.exceptions.TaskSuggestionNotFoundException;
-import domain.exceptions.UnauthorizedTaskAccessException;
-import domain.model.Task;
-import domain.model.TaskCategory;
-import domain.model.TaskPriority;
-import domain.model.TaskStatus;
-import domain.model.User;
-import infrastructure.persistence.InMemoryAssistantSessionRepository;
-import infrastructure.persistence.InMemoryTaskRepository;
+import com.taskmanager.application.*;
+import com.taskmanager.domain.assistant.AssistantSession;
+import com.taskmanager.domain.assistant.TaskSuggestion;
+import com.taskmanager.domain.exceptions.TaskSuggestionNotFoundException;
+import com.taskmanager.domain.exceptions.UnauthorizedTaskAccessException;
+import com.taskmanager.domain.model.Task;
+import com.taskmanager.domain.model.TaskCategory;
+import com.taskmanager.domain.model.TaskPriority;
+import com.taskmanager.domain.model.TaskStatus;
+import com.taskmanager.domain.model.User;
+import com.taskmanager.infrastructure.persistence.InMemoryAssistantSessionRepository;
+import com.taskmanager.infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import domain.notification.NotificationScheduleCalculator;
-import infrastructure.persistence.InMemoryNotificationRepository;
+import com.taskmanager.domain.notification.NotificationScheduleCalculator;
+import com.taskmanager.infrastructure.persistence.InMemoryNotificationRepository;
 
 import java.time.Clock;
 import java.util.List;

@@ -1,7 +1,7 @@
 package infrastructure;
 
-import domain.notification.Notification;
-import domain.notification.NotificationSender;
+import com.taskmanager.domain.notification.Notification;
+import com.taskmanager.domain.notification.NotificationSender;
 
 import java.util.ArrayList;
 import java.util.List;

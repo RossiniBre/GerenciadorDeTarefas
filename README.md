@@ -203,7 +203,7 @@ Current automated coverage:
 * Unauthorized requests
 * Invalid credentials handling
 
-Current test suite: 54 automated tests passing
+Current test suite: 77 automated tests passing
 
 ---
 
@@ -367,6 +367,37 @@ Throughout the project, every feature follows these principles:
 * Unit tests covering notification scheduling and lifecycle
 * End-to-end validation through Postman
 
+---
+
+# Phase 8 — Spring Boot migration
+
+The project migrated from a manually built HTTP infrastructure to Spring Boot while preserving the existing Clean Architecture boundaries.
+
+The migration focused on replacing infrastructure responsibilities without changing domain and application rules.
+
+Implemented:
+
+- Spring Boot application bootstrap
+- Spring ApplicationContext for dependency management
+- Configuration migration to Spring Beans
+- REST controllers replacing manual HTTP handlers
+- Global exception handling
+- Spring MVC request/response handling
+- Dependency injection through Spring
+- Authentication context migration
+- HTTP infrastructure modernization
+
+The migration preserved:
+
+- Domain entities
+- Application use cases
+- Repository contracts
+- Business rules
+- Unit test coverage
+
+The architecture evolved from:
+
+
 # Architecture
 
 ---
@@ -374,40 +405,35 @@ Throughout the project, every feature follows these principles:
 src/main/java
 │
 ├── domain
-│   ├── model
-│   ├── repository
-│   ├── assistant
-│   ├── exceptions
-│   ├── security
-│   └── notifications
+│ ├── model
+│ ├── repositories
+│ ├── assistant
+│ ├── exceptions
+│ ├── security
+│ └── notification
 │
 ├── application
-│   └── usecases
+│ └── usecases
 │
 ├── infrastructure
-│   │
-│   ├── http
-│   │   ├── dto
-│   │   ├── ApiServer
-│   │   ├── TasksHandler
-│   │   ├── UserHandler
-│   │   ├── AssistantHandler
-│   │   ├── Actions
-│   │   ├── JsonMapper
-│   │   ├── GsonJsonMapper
-│   │   └── HttpJson
-│   │
-│   ├── config
-│   │   ├── AssistantConfig
-│   │   └── DatabaseConfig
-│   │   
-│   ├── security
-│   │   ├── Pbkdf2PasswordHasher
-│   │   └── UuidTokenGenerator
-│   │   
-│   └── persistence
-│   
-└── Main
+│
+│ ├── http
+│ │ ├── controllers
+│ │ ├── dto
+│ │ ├── argumentresolver
+│ │ └── exceptionhandler
+│ │
+│ ├── config
+│ │ ├── SecurityConfig
+│ │ ├── RepositoryConfig
+│ │ ├── TaskUseCaseConfig
+│ │ └── NotificationConfig
+│ │
+│ ├── persistence
+│ │
+│ └── security
+│
+└── TaskManagerApplication
 ```
 Dependency direction:
 
@@ -444,35 +470,35 @@ The domain layer has no dependency on:
 
 # Roadmap
 
-| Phase | Status      | Scope                                |
-|------|-------------| ------------------------------------ |
-| 1    | Done        | Task creation                        |
-| 2    | Done        | Update, delete, tests                |
-| 3    | Done        | Categories, priorities, Builder      |
-| 4    | Done        | Users, authentication, authorization |
-| 5    | Done        | MySQL, REST API, HTTP adapters       |
-| 6    | Done        | AI assistant workflow, conversational memory and task operations |
-| 7    | Done        | Due dates and notification workflow |                              |
-| 8    | In Progress | Migration to Spring Boot                     
-| 9    |  | Frontend application                     |
-| 10   |  | Deployment                  |
+| Phase | Status      | Scope |
+| ----- |-------------| ----- |
+| 1     | Done        | Task creation |
+| 2     | Done        | Update, delete, tests |
+| 3     | Done        | Categories, priorities, Builder |
+| 4     | Done        | Users, authentication, authorization |
+| 5     | Done        | MySQL persistence, REST API, HTTP adapters |
+| 6     | Done        | AI assistant workflow, conversational memory and task operations |
+| 7     | Done        | Due dates and notification workflow |
+| 8     | Done        | Migration to Spring Boot |
+| 9     | In progress | Backend refinement and production architecture |
+| 10    |             | Frontend application |
+| 11    |             | Deployment and production environment |
 ----------------------------------------------------------
 
 
 # Tech Stack
 
-* Java 21
-* Maven
-* JUnit 5
-* MySQL 8
-* JDBC
-* Gson
-* Java Built-in HTTP Server
-* Docker
-* WSL2
-* Postman
-* Redis
-* OpenRouter API (LLM integration)
+- Java 21
+- Spring Boot
+- Spring MVC
+- Maven
+- JUnit 5
+- MySQL 8
+- JDBC
+- Redis
+- Docker
+- Postman
+- OpenRouter API
 
 ---
 
@@ -539,3 +565,6 @@ Final goals:
 * Context-aware assistant sessions
 * Safe AI-driven task execution workflow
 * Spring Boot migration
+* Spring Boot application architecture 
+* Dependency injection with Spring
+* REST API using Spring MVC

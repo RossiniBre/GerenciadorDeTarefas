@@ -1,10 +1,10 @@
 package infrastructure;
 
 import com.google.gson.Gson;
-import domain.assistant.TaskSuggestion;
-import domain.model.TaskCategory;
-import domain.model.TaskPriority;
-import infrastructure.persistence.AssistantGsonFactory;
+import com.taskmanager.domain.assistant.TaskSuggestion;
+import com.taskmanager.domain.model.TaskCategory;
+import com.taskmanager.domain.model.TaskPriority;
+import com.taskmanager.infrastructure.persistence.AssistantGsonFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

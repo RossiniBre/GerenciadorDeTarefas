@@ -1,8 +1,10 @@
 package application;
 
-import domain.model.Task;
-import infrastructure.persistence.InMemoryNotificationRepository;
-import infrastructure.persistence.InMemoryTaskRepository;
+import com.taskmanager.application.CancelNotificationsUseCase;
+import com.taskmanager.application.DeleteTaskUseCase;
+import com.taskmanager.domain.model.Task;
+import com.taskmanager.infrastructure.persistence.InMemoryNotificationRepository;
+import com.taskmanager.infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

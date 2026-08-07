@@ -1,10 +1,10 @@
 package domain;
 
-import application.ListTasksUseCase;
-import domain.assistant.*;
-import domain.model.Task;
-import domain.repositories.TaskRepository;
-import infrastructure.http.json.GsonJsonMapper;
+import com.taskmanager.application.ListTasksUseCase;
+import com.taskmanager.domain.assistant.*;
+import com.taskmanager.domain.model.Task;
+import com.taskmanager.domain.repositories.TaskRepository;
+import com.taskmanager.infrastructure.http.json.GsonJsonMapper;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;

@@ -1,9 +1,13 @@
 package application;
 
-import domain.model.Task;
-import domain.notification.NotificationScheduleCalculator;
-import infrastructure.persistence.InMemoryNotificationRepository;
-import infrastructure.persistence.InMemoryTaskRepository;
+import com.taskmanager.application.CancelNotificationsUseCase;
+import com.taskmanager.application.CreateNotificationUseCase;
+import com.taskmanager.application.RescheduleNotificationsUseCase;
+import com.taskmanager.application.UpdateTaskDetailsUseCase;
+import com.taskmanager.domain.model.Task;
+import com.taskmanager.domain.notification.NotificationScheduleCalculator;
+import com.taskmanager.infrastructure.persistence.InMemoryNotificationRepository;
+import com.taskmanager.infrastructure.persistence.InMemoryTaskRepository;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;

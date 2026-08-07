@@ -1,14 +1,15 @@
 package application;
 
-import domain.security.PasswordHasher;
-import domain.model.User;
-import domain.repositories.UserRepository;
-import infrastructure.persistence.InMemoryUserRepository;
-import infrastructure.security.Pbkdf2PasswordHasher;
+import com.taskmanager.application.RegisterUserUseCase;
+import com.taskmanager.domain.security.PasswordHasher;
+import com.taskmanager.domain.model.User;
+import com.taskmanager.domain.repositories.UserRepository;
+import com.taskmanager.infrastructure.persistence.InMemoryUserRepository;
+import com.taskmanager.infrastructure.security.Pbkdf2PasswordHasher;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import domain.exceptions.InvalidFieldException;
-import domain.exceptions.DuplicateUsernameException;
+import com.taskmanager.domain.exceptions.InvalidFieldException;
+import com.taskmanager.domain.exceptions.DuplicateUsernameException;
 
 class RegisterUserUseCaseTest {
 
